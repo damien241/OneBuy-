@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0f" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="author" content="Damien (Starly Koumba)" />
+<title>OneBuy</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  *{font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+  html,body{height:100%;margin:0;padding:0;overscroll-behavior:none;user-select:none}
+  body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:hidden}
+  :root{
+    --violet:#8b5cf6;--violet-deep:#6d28d9;--bg:#0a0a0f;--card:#141420;
+    --card-hi:#1c1c2e;--border:rgba(255,255,255,.06);--muted:#8a8a9c;
+  }
+  .app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg)}
+  .status-bar{height:env(safe-area-inset-top);min-height:env(safe-area-inset-top)}
+  .appbar{height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+  .appbar h1{font-size:22px;font-weight:800;letter-spacing:-.5px}
+  .icon-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);color:#fff;border:none;transition:transform .15s}
+  .icon-btn:active{transform:scale(.92)}
+  .content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+  .content::-webkit-scrollbar{display:none}
+  .tabbar{position:absolute;left:0;right:0;bottom:0;height:calc(64px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:rgba(10,10,15,.92);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-top:1px solid var(--border);display:flex;align-items:flex-start;padding-top:8px}
+  .tabbar.hide{display:none}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);background:none;border:none;padding:6px 0;font-size:10px;font-weight:600;transition:color .2s;position:relative}
+  .tab svg{width:22px;height:22px;stroke-width:2}
+  .tab.on{color:var(--violet)}
+  .tab.on::before{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:20px;height:3px;border-radius:2px;background:var(--violet)}
+  .tab.hidden{display:none}
+  .scr{display:none;animation:in .28s cubic-bezier(.22,1,.36,1)}
+  .scr.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .card{background:var(--card);border-radius:18px;border:1px solid var(--border)}
+  .tile{aspect-ratio:1;border-radius:16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .tile svg{width:34px;height:34px;color:#fff;position:relative;z-index:1}
+  .tile::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent 60%)}
+  .press{transition:transform .12s}
+  .press:active{transform:scale(.96)}
+  .btn{width:100%;padding:16px;border:none;border-radius:16px;font-size:15px;font-weight:700;letter-spacing:-.2px;background:var(--violet);color:#fff;transition:transform .12s,background .2s}
+  .btn:active{transform:scale(.97);background:var(--violet-deep)}
+  .btn.ghost{background:var(--card-hi);color:#fff}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  .field input,.field textarea,.field select{width:100%;padding:15px 16px;font-size:15px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;color:#fff;font-family:inherit;transition:border-color .2s}
+  .field input::placeholder,.field textarea::placeholder{color:#5a5a6c}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--violet);outline:none}
+  .field textarea{resize:none;min-height:90px}
+  .field .hint{font-size:11px;color:var(--muted);margin-top:6px}
+  .upload{display:block;padding:22px 16px;text-align:center;background:var(--card);border:1.5px dashed rgba(139,92,246,.25);border-radius:16px;cursor:pointer;transition:border-color .2s}
+  .upload:active{border-color:var(--violet)}
+  .upload svg{width:22px;height:22px;color:var(--violet);margin:0 auto 8px}
+  .chip{padding:8px 14px;border-radius:12px;font-size:13px;font-weight:600;white-space:nowrap;background:var(--card);border:1px solid var(--border);color:#fff;transition:all .15s}
+  .chip.on{background:var(--violet);border-color:var(--violet)}
+  .splash{position:fixed;inset:0;z-index:100;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
+  .splash.out{opacity:0;pointer-events:none}
+  .logo-mark{font-size:44px;font-weight:900;letter-spacing:-2px;background:linear-gradient(135deg,#a78bfa,#8b5cf6 60%,#6d28d9);-webkit-background-clip:text;background-clip:text;color:transparent;animation:zoom .7s cubic-bezier(.22,1,.36,1)}
+  .logo-sub{font-size:11px;color:var(--muted);margin-top:14px;letter-spacing:1px}
+  @keyframes zoom{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+  .loader{margin-top:26px;width:22px;height:22px;border-radius:50%;border:2.5px solid rgba(139,92,246,.2);border-top-color:var(--violet);animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--violet);color:#fff;padding:12px 20px;border-radius:14px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all .3s;z-index:200;max-width:90vw;text-align:center}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.err{background:#dc2626}
+  .sect{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin:26px 0 12px}
+  .sect h2{font-size:17px;font-weight:800;letter-spacing:-.3px}
+  .sect button{font-size:12px;color:var(--violet);font-weight:700;background:none;border:none}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
+  .hero{margin:0 16px;padding:20px;border-radius:22px;background:linear-gradient(135deg,#7c3aed,#5b21b6 70%,#3b0764);position:relative;overflow:hidden}
+  .hero h3{font-size:19px;font-weight:800;line-height:1.2;letter-spacing:-.4px;position:relative}
+  .hero p{font-size:12px;color:rgba(255,255,255,.75);margin-top:6px;position:relative}
+  .hero button{margin-top:16px;padding:10px 18px;background:#fff;color:#4c1d95;border:none;border-radius:12px;font-size:12px;font-weight:800;position:relative}
+  .back{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);border:none;color:#fff}
+  .badge{padding:4px 8px;border-radius:8px;font-size:10px;font-weight:700}
+  .badge.green{background:rgba(34,197,94,.15);color:#4ade80}
+  .badge.yellow{background:rgba(234,179,8,.15);color:#facc15}
+  .avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800}
+  .search{margin:0 16px;position:relative}
+  .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}
+  .search input{width:100%;padding:13px 16px 13px 40px;background:var(--card);border:1px solid var(--border);border-radius:14px;color:#fff;font-size:14px;font-family:inherit}
+  .search input:focus{outline:none;border-color:var(--violet)}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:14px 16px 4px}
+  .chips::-webkit-scrollbar{display:none}
+  .li{display:flex;align-items:center;gap:12px;padding:14px;background:var(--card);border-radius:14px;border:1px solid var(--border)}
+  .role-card{padding:28px 20px;border-radius:22px;background:var(--card);border:1.5px solid var(--border);text-align:center;transition:all .2s;cursor:pointer;position:relative}
+  .role-card:active{transform:scale(.97)}
+  .role-card.sel{border-color:var(--violet);background:linear-gradient(180deg,rgba(139,92,246,.15),rgba(139,92,246,.05))}
+  .role-card .ic{width:64px;height:64px;border-radius:20px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
+  .role-card .ic svg{width:30px;height:30px;color:#fff}
+  .role-card h3{font-size:16px;font-weight:800;letter-spacing:-.3px}
+  .role-card p{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .steps{display:flex;justify-content:center;gap:6px;margin-bottom:24px}
+  .steps span{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.15)}
+  .steps span.on{background:var(--violet);width:18px}
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <div class="logo-mark">OneBuy</div>
+  <div class="logo-sub">Conçu par Damien (Starly Koumba)</div>
+  <div class="loader"></div>
+</div>
+
+<div class="app" id="app" style="display:none">
+  <div class="status-bar"></div>
+
+  <header class="appbar" id="appbar">
+    <h1 id="title">OneBuy</h1>
+    <div id="appbar-actions" style="display:none;gap:8px">
+      <button class="icon-btn" onclick="toast('Bientôt')"><i data-lucide="search" style="width:18px;height:18px"></i></button>
+      <button class="icon-btn" onclick="go('achats')"><i data-lucide="shopping-bag" style="width:18px;height:18px"></i></button>
+    </div>
+  </header>
+
+  <div class="content" id="content">
+
+    <!-- ROLE -->
+    <section class="scr on" id="s-role">
+      <div style="padding:20px 24px 0">
+        <div class="logo-mark" style="font-size:36px;text-align:center">OneBuy</div>
+        <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5">Comment souhaitez-vous utiliser OneBuy ?</p>
+        <div style="display:grid;gap:14px;margin-top:32px">
+          <div class="role-card" id="rc-client" onclick="pickRole('client')">
+            <div class="ic" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)"><i data-lucide="shopping-bag"></i></div>
+            <h3>Je suis Client</h3>
+            <p>Acheter des applications web,<br>livres audio et vidéos</p>
+          </div>
+          <div class="role-card" id="rc-vendeur" onclick="pickRole('vendeur')">
+            <div class="ic" style="background:linear-gradient(135deg,#3b82f6,#1e40af)"><i data-lucide="store"></i></div>
+            <h3>Je suis Vendeur</h3>
+            <p>Vendre mes applications web,<br>audios et vidéos sur OneBuy</p>
+          </div>
+        </div>
+        <button class="btn" id="role-next" disabled onclick="go('signup')" style="margin-top:24px">Continuer</button>
+        <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:20px">
+          Déjà un compte ? <button onclick="go('login')" style="color:var(--violet);background:none;border:none;font-weight:700;font-size:12px">Se connecter</button>
+        </p>
+      </div>
+    </section>
+
+    <!-- SIGNUP -->
+    <section class="scr" id="s-signup">
+      <div style="padding:20px 24px 0">
+        <button class="back" onclick="go('role')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
+        <div class="steps" style="margin-top:22px"><span></span><span class="on"></span><span></span></div>
+        <h2 style="font-size:22px;font-weight:800;text-align:center">Créer un compte</h2>
+        <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:8px" id="signup-role-label">Profil : Client</p>
+        <form id="signup-form" style="margin-top:26px">
+          <div class="field"><label>Nom complet</label><input type="text" id="su-nom" required placeholder="Ex : Starly Koumba" /></div>
+          <div class="field"><label>Adresse e-mail</label><input type="email" id="su-email" required placeholder="ton@email.com" /></div>
+          <div class="field"><label>Numéro de téléphone</label><input type="tel" id="su-tel" required placeholder="+241 07 XX XX XX" /></div>
+          <div class="field"><label>Ville</label><input type="text" id="su-ville" required placeholder="Ex : Libreville" /></div>
+          <div class="field"><label>Mot de passe</label><input type="password" id="su-pwd" required placeholder="••••••••" minlength="6" /><p class="hint">6 caractères minimum</p></div>
+          <button class="btn" type="submit" id="su-btn" style="margin-top:8px">Créer mon compte</button>
+          <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:20px">
+            Déjà un compte ? <button type="button" onclick="go('login')" style="color:var(--violet);background:none;border:none;font-weight:700;font-size:12px">Se connecter</button>
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <!-- LOGIN -->
+    <section class="scr" id="s-login">
+      <div style="padding:20px 24px 0">
+        <button class="back" onclick="go('role')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
+        <div style="text-align:center;margin-top:40px">
+          <div class="logo-mark" style="font-size:34px">OneBuy</div>
+          <p style="font-size:12px;color:var(--muted);margin-top:10px">Connectez-vous à votre compte</p>
+        </div>
+        <form id="login-form" style="margin-top:36px">
+          <div class="field"><label>Adresse e-mail</label><input type="email" id="li-email" required placeholder="ton@email.com" /></div>
+          <div class="field"><label>Mot de passe</label><input type="password" id="li-pwd" required placeholder="••••••••" /></div>
+          <button class="btn" type="submit" id="li-btn" style="margin-top:8px">Se connecter</button>
+          <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:20px">
+            Pas de compte ? <button type="button" onclick="go('role')" style="color:var(--violet);background:none;border:none;font-weight:700;font-size:12px">S'inscrire</button>
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ACCUEIL -->
+    <section class="scr" id="s-accueil">
+      <div class="search"><i data-lucide="search"></i><input placeholder="Rechercher une application..." id="search-input" oninput="filtrerProduits()" /></div>
+      <div class="chips">
+        <button class="chip on" onclick="filtreCategorie('tous', this)">Tout</button>
+        <button class="chip" onclick="filtreCategorie('app_web', this)">Apps web</button>
+        <button class="chip" onclick="filtreCategorie('livre_audio', this)">Audio</button>
+        <button class="chip" onclick="filtreCategorie('video', this)">Vidéos</button>
+      </div>
+      <div style="margin-top:16px">
+        <div class="hero">
+          <h3>Découvrez les meilleures<br>applications web</h3>
+          <p>Paiement sécurisé avec Airtel & Moov Money</p>
+          <button onclick="go('apps')">Explorer maintenant</button>
+        </div>
+      </div>
+      <div class="sect"><h2>Produits récents</h2></div>
+      <div class="grid2" id="accueil-produits"><p style="color:var(--muted);font-size:13px;padding:0 16px">Chargement...</p></div>
+    </section>
+
+    <!-- CATALOGUE -->
+    <section class="scr" id="s-apps">
+      <div class="chips">
+        <button class="chip on" onclick="filtreCategorie('tous', this)">Tout</button>
+        <button class="chip" onclick="filtreCategorie('app_web', this)">Apps web</button>
+        <button class="chip" onclick="filtreCategorie('livre_audio', this)">Audio</button>
+        <button class="chip" onclick="filtreCategorie('video', this)">Vidéos</button>
+      </div>
+      <div class="grid2" style="margin-top:16px" id="apps-produits"><p style="color:var(--muted);font-size:13px;padding:0 16px">Chargement...</p></div>
+    </section>
+
+    <!-- PRODUIT -->
+    <section class="scr" id="s-produit">
+      <div style="padding:0 16px" id="produit-detail">
+        <p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p>
+      </div>
+    </section>
+
+    <!-- CHECKOUT -->
+    <section class="scr" id="s-checkout">
+      <div style="padding:0 16px" id="checkout-content">
+        <p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p>
+      </div>
+    </section>
+
+    <!-- ACHATS -->
+    <section class="scr" id="s-achats">
+      <div style="padding:0 16px" id="achats-list">
+        <p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Aucun achat pour l'instant</p>
+      </div>
+    </section>
+
+    <!-- VENDRE -->
+    <section class="scr" id="s-vendre">
+      <div style="padding:0 16px">
+        <div class="card" style="padding:16px;display:flex;align-items:center;gap:12px">
+          <div class="avatar" id="v-avatar">?</div>
+          <div style="flex:1">
+            <p style="font-size:14px;font-weight:800" id="v-nom">Chargement...</p>
+            <p style="font-size:11px;color:var(--muted);margin-top:2px">Vendeur</p>
+          </div>
+        </div>
+        <button class="btn" style="margin-top:20px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="go('ajouter')">
+          <i data-lucide="plus" style="width:18px;height:18px"></i> Ajouter un produit
+        </button>
+        <div class="sect" style="padding:0;margin:24px 0 10px"><h2 style="font-size:15px">Mes produits</h2></div>
+        <div id="v-produits" style="display:flex;flex-direction:column;gap:8px;margin-bottom:30px">
+          <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Aucun produit</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- AJOUTER -->
+    <section class="scr" id="s-ajouter">
+      <div style="padding:0 16px">
+        <button class="back" onclick="go('vendre')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
+        <h2 style="font-size:20px;font-weight:800;margin-top:18px">Nouveau produit</h2>
+        <form id="produit-form" style="margin-top:20px">
+          <div class="field">
+            <label>Type de produit</label>
+            <select id="p-type"><option value="app_web">Application web</option><option value="livre_audio">Livre audio</option><option value="video">Vidéo</option></select>
+          </div>
+          <div class="field"><label>Titre</label><input type="text" id="p-titre" required placeholder="Ex : Asha Manager" /></div>
+          <div class="field"><label>Description</label><textarea id="p-desc" required placeholder="Décrivez votre produit..."></textarea></div>
+          <div class="field"><label>Prix (FCFA)</label><input type="number" id="p-prix" required placeholder="5000" /></div>
+          <div class="field">
+            <label style="display:flex;align-items:center;gap:6px"><i data-lucide="link" style="width:12px;height:12px;color:var(--violet)"></i>Lien de l'application web</label>
+            <input type="url" id="p-lien" placeholder="https://mon-app.com" />
+          </div>
+
+          <div class="field">
+            <label>Moyens de paiement acceptés</label>
+            <div class="card" style="padding:14px;margin-bottom:10px">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                <input type="checkbox" id="pay-airtel" style="width:18px;height:18px;accent-color:#8b5cf6" onchange="togglePay('airtel')" />
+                <span style="flex:1;font-size:14px;font-weight:700">Airtel Money</span>
+              </label>
+              <input type="tel" id="num-airtel" placeholder="+241 07 XX XX XX" disabled style="width:100%;margin-top:12px;padding:12px;font-size:14px;background:#0a0a0f;border:1.5px solid var(--border);border-radius:12px;color:#fff;font-family:inherit" />
+            </div>
+            <div class="card" style="padding:14px">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                <input type="checkbox" id="pay-moov" style="width:18px;height:18px;accent-color:#8b5cf6" onchange="togglePay('moov')" />
+                <span style="flex:1;font-size:14px;font-weight:700">Moov Money</span>
+              </label>
+              <input type="tel" id="num-moov" placeholder="+241 06 XX XX XX" disabled style="width:100%;margin-top:12px;padding:12px;font-size:14px;background:#0a0a0f;border:1.5px solid var(--border);border-radius:12px;color:#fff;font-family:inherit" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Logo du produit (image)</label>
+            <label class="upload">
+              <input type="file" accept="image/*" id="p-logo" hidden onchange="previewFile(event,'logo-prev')" />
+              <i data-lucide="image"></i>
+              <p style="font-size:13px;font-weight:600">Choisir une image</p>
+              <p style="font-size:11px;color:var(--muted);margin-top:4px">JPG, PNG — max 5 Mo</p>
+            </label>
+            <img id="logo-prev" style="display:none;width:100px;height:100px;object-fit:cover;border-radius:12px;margin-top:10px" />
+          </div>
+
+          <div class="field">
+            <label>Aperçu audio (10 min max) — optionnel</label>
+            <label class="upload">
+              <input type="file" accept="audio/*" id="p-audio" hidden onchange="checkAudio(event)" />
+              <i data-lucide="music"></i>
+              <p style="font-size:13px;font-weight:600">Choisir un audio</p>
+            </label>
+            <p id="audio-info" style="display:none;font-size:11px;margin-top:8px"></p>
+          </div>
+
+          <div class="field">
+            <label>Aperçu vidéo (3 min max) — optionnel</label>
+            <label class="upload">
+              <input type="file" accept="video/*" id="p-video" hidden onchange="checkVideo(event)" />
+              <i data-lucide="film"></i>
+              <p style="font-size:13px;font-weight:600">Choisir une vidéo</p>
+            </label>
+            <p id="video-info" style="display:none;font-size:11px;margin-top:8px"></p>
+          </div>
+
+          <button class="btn" type="submit" id="p-btn" style="margin-top:20px;margin-bottom:30px">Publier le produit</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- COMPTE -->
+    <section class="scr" id="s-compte">
+      <div style="padding:0 16px">
+        <div class="card" style="padding:18px;display:flex;align-items:center;gap:14px">
+          <div class="avatar" id="c-avatar">?</div>
+          <div style="flex:1">
+            <p style="font-size:15px;font-weight:800" id="c-nom">Chargement...</p>
+            <p style="font-size:12px;color:var(--muted);margin-top:2px" id="c-email">...</p>
+          </div>
+        </div>
+        <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
+          <button class="li" style="width:100%;text-align:left" onclick="go('achats')">
+            <i data-lucide="shopping-bag" style="width:18px;height:18px;color:var(--violet)"></i>
+            <span style="flex:1;font-size:13px;font-weight:600">Mes achats</span>
+            <i data-lucide="chevron-right" style="width:16px;height:16px;color:var(--muted)"></i>
+          </button>
+          <button class="li" id="menu-vendeur" style="width:100%;text-align:left;display:none" onclick="go('vendre')">
+            <i data-lucide="store" style="width:18px;height:18px;color:var(--violet)"></i>
+            <span style="flex:1;font-size:13px;font-weight:600">Espace vendeur</span>
+            <i data-lucide="chevron-right" style="width:16px;height:16px;color:var(--muted)"></i>
+          </button>
+          <button class="li" style="width:100%;text-align:left" onclick="logout()">
+            <i data-lucide="log-out" style="width:18px;height:18px;color:#f87171"></i>
+            <span style="flex:1;font-size:13px;font-weight:600;color:#f87171">Se déconnecter</span>
+          </button>
+        </div>
+        <p style="text-align:center;font-size:10px;color:var(--muted);margin-top:30px">© 2025 OneBuy — Damien (Starly Koumba)</p>
+      </div>
+    </section>
+
+  </div>
+
+  <nav class="tabbar hide" id="tabbar">
+    <button class="tab on" data-tab="accueil" onclick="go('accueil')"><i data-lucide="home"></i><span>Accueil</span></button>
+    <button class="tab" data-tab="apps" onclick="go('apps')"><i data-lucide="compass"></i><span>Explorer</span></button>
+    <button class="tab hidden" data-tab="vendre" data-role="vendeur" onclick="go('vendre')"><i data-lucide="store"></i><span>Vendre</span></button>
+    <button class="tab" data-tab="achats" onclick="go('achats')"><i data-lucide="package"></i><span>Achats</span></button>
+    <button class="tab" data-tab="compte" onclick="go('compte')"><i data-lucide="user"></i><span>Compte</span></button>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ================== CONFIG SUPABASE ==================
+const SUPABASE_URL = "https://ijannxjdcrzaiexnzhqk.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqYW5ueGpkY3J6YWlleG56aHFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5OTAzOTcsImV4cCI6MjEwNzU2NjM5N30.xziX17R1bbEFFYPMoKYRUvt0uZDU9LMlANoRMcjoo60";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ================== STATE ==================
+let currentUser = null;
+let currentProfile = null;
+let currentRole = null;
+let chosenRole = null;
+let allProduits = [];
+let filtreActif = 'tous';
+let produitCourant = null;
+
+const VENDEUR_ONLY = ['vendre', 'ajouter'];
+const config = {
+  role:{t:'',bar:false,tab:false},
+  signup:{t:'',bar:false,tab:false},
+  login:{t:'',bar:false,tab:false},
+  accueil:{t:'OneBuy',bar:true,tab:true},
+  apps:{t:'Explorer',bar:true,tab:true},
+  produit:{t:'',bar:false,tab:true},
+  checkout:{t:'Paiement',bar:false,tab:true},
+  achats:{t:'Mes achats',bar:true,tab:true},
+  vendre:{t:'Vendre',bar:true,tab:true},
+  ajouter:{t:'',bar:false,tab:true},
+  compte:{t:'Compte',bar:true,tab:true}
+};
+
+// ================== INIT ==================
+lucide.createIcons();
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadProfile();
+    await afterLogin();
+  } else {
+    go('role');
+  }
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('out');
+    document.getElementById('app').style.display = 'flex';
+    setTimeout(() => document.getElementById('splash').remove(), 600);
+  }, 1500);
+}
+init();
+
+// ================== AUTH ==================
+document.getElementById('signup-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('su-btn');
+  btn.disabled = true; btn.textContent = 'Création...';
+  const nom = document.getElementById('su-nom').value.trim();
+  const email = document.getElementById('su-email').value.trim();
+  const tel = document.getElementById('su-tel').value.trim();
+  const ville = document.getElementById('su-ville').value.trim();
+  const pwd = document.getElementById('su-pwd').value;
+
+  const { data, error } = await sb.auth.signUp({
+    email, password: pwd,
+    options: { data: { nom_complet: nom, telephone: tel, ville, role: chosenRole || 'client' } }
+  });
+
+  btn.disabled = false; btn.textContent = 'Créer mon compte';
+
+  if (error) { toast(error.message, true); return; }
+
+  if (data.user && !data.session) {
+    toast('Vérifie ton email pour confirmer ton compte', true);
+    go('login');
+    return;
+  }
+
+  currentUser = data.user;
+  await loadProfile();
+  toast('Compte créé ✅');
+  await afterLogin();
+});
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('li-btn');
+  btn.disabled = true; btn.textContent = 'Connexion...';
+  const email = document.getElementById('li-email').value.trim();
+  const pwd = document.getElementById('li-pwd').value;
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
+  btn.disabled = false; btn.textContent = 'Se connecter';
+
+  if (error) { toast(error.message, true); return; }
+
+  currentUser = data.user;
+  await loadProfile();
+  toast('Bienvenue ✅');
+  await afterLogin();
+});
+
+async function loadProfile() {
+  const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  currentProfile = data;
+  currentRole = data?.role || 'client';
+}
+
+async function afterLogin() {
+  applyRole();
+  await chargerProduits();
+  go('accueil');
+}
+
+async function logout() {
+  await sb.auth.signOut();
+  currentUser = null; currentProfile = null; currentRole = null; chosenRole = null; allProduits = [];
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('role-next').disabled = true;
+  applyRole();
+  go('role');
+}
+
+// ================== ROLES ==================
+function pickRole(role) {
+  chosenRole = role;
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('rc-'+role).classList.add('sel');
+  document.getElementById('role-next').disabled = false;
+}
+
+function applyRole() {
+  document.querySelectorAll('.tab').forEach(t=>{
+    const needed = t.dataset.role;
+    if (needed && needed !== currentRole) t.classList.add('hidden');
+    else t.classList.remove('hidden');
+  });
+  const menuVendeur = document.getElementById('menu-vendeur');
+  if (menuVendeur) menuVendeur.style.display = (currentRole === 'vendeur') ? 'flex' : 'none';
+
+  if (currentProfile) {
+    const initiale = (currentProfile.nom_complet || 'U')[0].toUpperCase();
+    document.getElementById('c-avatar').textContent = initiale;
+    document.getElementById('c-nom').textContent = currentProfile.nom_complet;
+    document.getElementById('c-email').textContent = currentProfile.email;
+    document.getElementById('v-avatar').textContent = initiale;
+    document.getElementById('v-nom').textContent = currentProfile.nom_complet;
+  }
+}
+
+// ================== NAVIGATION ==================
+function go(name) {
+  if (currentRole === 'client' && VENDEUR_ONLY.includes(name)) {
+    toast('Accès réservé aux vendeurs', true); name = 'accueil';
+  }
+  if (!currentUser && !['role','signup','login'].includes(name)) {
+    name = 'role';
+  }
+  const c = config[name] || {t:'OneBuy',bar:true,tab:true};
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  const target = document.getElementById('s-'+name);
+  if (target) target.classList.add('on');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  const tab = document.querySelector('.tab[data-tab="'+name+'"]');
+  if (tab) tab.classList.add('on');
+  document.getElementById('title').textContent = c.t;
+  document.getElementById('appbar-actions').style.display = c.bar ? 'flex' : 'none';
+  document.getElementById('appbar').style.visibility = c.t ? 'visible' : 'hidden';
+  document.getElementById('tabbar').classList.toggle('hide', !c.tab);
+  document.getElementById('content').scrollTop = 0;
+  lucide.createIcons();
+
+  if (name === 'signup' && chosenRole) {
+    document.getElementById('signup-role-label').textContent = 'Profil : ' + (chosenRole === 'vendeur' ? 'Vendeur' : 'Client');
+  }
+  if (name === 'vendre') chargerMesProduits();
+  if (name === 'achats') chargerAchats();
+}
+
+// ================== PRODUITS ==================
+async function chargerProduits() {
+  const { data, error } = await sb.from('produits').select('*').eq('statut','publie').order('created_at',{ascending:false});
+  if (error) { console.error(error); return; }
+  allProduits = data || [];
+  afficherProduits();
+}
+
+function afficherProduits() {
+  const q = (document.getElementById('search-input')?.value || '').toLowerCase();
+  let liste = allProduits.filter(p => p.titre.toLowerCase().includes(q));
+  if (filtreActif !== 'tous') liste = liste.filter(p => p.type === filtreActif);
+
+  const html = liste.length === 0
+    ? '<p style="color:var(--muted);font-size:13px;padding:0 16px">Aucun produit pour l\'instant</p>'
+    : liste.map(p => carteProduit(p)).join('');
+
+  const el1 = document.getElementById('accueil-produits');
+  const el2 = document.getElementById('apps-produits');
+  if (el1) el1.innerHTML = html;
+  if (el2) el2.innerHTML = html;
+  lucide.createIcons();
+}
+
+function carteProduit(p) {
+  const grad = p.type === 'app_web' ? 'linear-gradient(135deg,#8b5cf6,#6d28d9)'
+    : p.type === 'livre_audio' ? 'linear-gradient(135deg,#3b82f6,#1e40af)'
+    : 'linear-gradient(135deg,#ec4899,#831843)';
+  const icone = p.type === 'app_web' ? 'layout-grid' : p.type === 'livre_audio' ? 'headphones' : 'video';
+  const logo = p.logo_url
+    ? '<img src="'+p.logo_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:16px;position:absolute;inset:0" />'
+    : '<i data-lucide="'+icone+'"></i>';
+
+  return `
+    <div class="press" onclick="ouvrirProduit('${p.id}')">
+      <div class="tile" style="background:${grad};position:relative">${logo}</div>
+      <p style="font-weight:700;font-size:13px;margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titre}</p>
+      <p style="font-size:11px;color:var(--muted);margin-top:2px">${p.ventes || 0} ventes</p>
+      <p style="font-size:13px;font-weight:800;color:var(--violet);margin-top:6px">${Number(p.prix).toLocaleString('fr-FR')} ${p.devise||'FCFA'}</p>
+    </div>`;
+}
+
+function filtrerProduits() { afficherProduits(); }
+function filtreCategorie(cat, btn) {
+  filtreActif = cat;
+  document.querySelectorAll('#s-accueil .chip, #s-apps .chip').forEach(c => c.classList.remove('on'));
+  btn.classList.add('on');
+  afficherProduits();
+}
+
+async function ouvrirProduit(id) {
+  produitCourant = allProduits.find(p => p.id === id);
+  if (!produitCourant) return;
+  const p = produitCourant;
+
+  // Charger les moyens de paiement
+  const { data: mp } = await sb.from('moyens_paiement').select('*').eq('produit_id', id);
+  p.moyens = mp || [];
+
+  const grad = p.type === 'app_web' ? 'linear-gradient(135deg,#8b5cf6,#6d28d9)'
+    : p.type === 'livre_audio' ? 'linear-gradient(135deg,#3b82f6,#1e40af)'
+    : 'linear-gradient(135deg,#ec4899,#831843)';
+  const logo = p.logo_url
+    ? '<img src="'+p.logo_url+'" style="width:88px;height:88px;object-fit:cover;border-radius:22px;flex-shrink:0" />'
+    : '<div class="tile" style="width:88px;flex-shrink:0;background:'+grad+'"><i data-lucide="layout-grid" style="width:40px;height:40px"></i></div>';
+
+  document.getElementById('produit-detail').innerHTML = `
+    <button class="back" onclick="go('accueil')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
+    <div style="display:flex;gap:16px;margin-top:18px;align-items:center">
+      ${logo}
+      <div style="flex:1;min-width:0">
+        <h2 style="font-size:20px;font-weight:800">${p.titre}</h2>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px">${p.ventes||0} ventes</p>
+      </div>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-top:20px">
+      <span style="font-size:30px;font-weight:900;color:var(--violet)">${Number(p.prix).toLocaleString('fr-FR')}</span>
+      <span style="font-size:14px;font-weight:700;color:var(--muted)">${p.devise||'FCFA'}</span>
+    </div>
+    ${p.audio_url ? `
+      <div class="card" style="padding:14px;margin-top:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <i data-lucide="headphones" style="width:14px;height:14px;color:var(--violet)"></i>
+          <span style="font-size:12px;font-weight:700">Aperçu audio</span>
+        </div>
+        <audio controls style="width:100%" src="${p.audio_url}"></audio>
+      </div>` : ''}
+    ${p.video_url ? `
+      <div class="card" style="padding:14px;margin-top:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <i data-lucide="video" style="width:14px;height:14px;color:var(--violet)"></i>
+          <span style="font-size:12px;font-weight:700">Aperçu vidéo</span>
+        </div>
+        <video controls style="width:100%;border-radius:12px" src="${p.video_url}"></video>
+      </div>` : ''}
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn" style="flex:1" onclick="go('checkout')">Acheter</button>
+    </div>
+    <h3 style="font-size:15px;font-weight:800;margin:24px 0 8px">Description</h3>
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:30px">${p.description_longue || p.description_courte || 'Pas de description.'}</p>
+  `;
+  go('produit');
+  lucide.createIcons();
+}
+
+// ================== CHECKOUT ==================
+function goCheckout() {
+  if (!produitCourant) return;
+  const p = produitCourant;
+  const moyens = p.moyens || [];
+  if (moyens.length === 0) {
+    document.getElementById('checkout-content').innerHTML = `
+      <button class="back" onclick="go('produit')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
+      <p style="text-align:center;padding:40px 0;color:var(--muted)">Le vendeur n'a pas encore configuré de moyen de paiement.</p>
+    `;
+    go('checkout'); lucide.createIcons();
+    return;
+  }
+
+  const choixHtml = moyens.length > 1
+    ? `<div id="pay-choice" style="display:flex;gap:8px;margin-bottom:12px">
+        ${moyens.map((m,i)=>`<button class="chip ${i===0?'on':''}" style="flex:1" onclick="selectPay('${m.operateur}', this)">${m.operateur === 'airtel' ? 'Airtel Money' : 'Moov Money'}</button>`).join('')}
+      </div>`
+    : '';
+
+  const first = moyens[0];
+  document.getElementById('checkout-content').innerHTML = `
+    <button class="back" onclick="go('produit')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
+    <h2 style="font-size:20px;font-weight:800;margin-top:18px">Paiement mobile money</h2>
+    <div class="card" style="padding:16px;margin-top:18px">
+      <p style="font-size:11px;color:var(--muted);font-weight:600">PRODUIT</p>
+      <p style="font-size:14px;font-weight:700;margin-top:4px">${p.titre}</p>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px">
+        <span style="font-size:11px;color:var(--muted);font-weight:600">TOTAL</span>
+        <span style="font-size:22px;font-weight:900;color:var(--violet)">${Number(p.prix).toLocaleString('fr-FR')} ${p.devise||'FCFA'}</span>
+      </div>
+    </div>
+    ${choixHtml}
+    <div style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);border-radius:16px;padding:16px;margin-top:14px">
+      <p style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:10px">📱 Envoyez le montant au numéro :</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:#0a0a0f;border-radius:12px;padding:14px">
+        <div>
+          <p id="pay-label" style="font-size:11px;color:var(--muted);margin-bottom:4px">${first.operateur === 'airtel' ? 'Airtel Money' : 'Moov Money'}</p>
+          <span id="pay-number" style="font-family:monospace;font-size:15px;font-weight:800">${first.numero}</span>
+        </div>
+        <button style="color:var(--violet);font-size:11px;font-weight:700;background:none;border:none" onclick="copyPay()">Copier</button>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px">Bénéficiaire : ${first.nom_beneficiaire || 'Le vendeur'}</p>
+    </div>
+    <div class="card" style="padding:16px;margin-top:14px">
+      <p style="font-size:12px;font-weight:700;margin-bottom:10px">📸 Capture d'écran du dépôt</p>
+      <label class="upload">
+        <input type="file" accept="image/*" id="preuve-img" hidden onchange="previewFile(event,'preuve-prev')" />
+        <i data-lucide="image-plus"></i>
+        <p style="font-size:13px;font-weight:600">Ajouter la capture</p>
+      </label>
+      <img id="preuve-prev" style="display:none;width:100%;border-radius:12px;margin-top:10px" />
+    </div>
+    <button class="btn" style="margin-top:20px" id="envoyer-btn">Envoyer la preuve</button>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">Le vendeur validera manuellement.</p>
+  `;
+  document.getElementById('envoyer-btn').addEventListener('click', envoyerPreuve);
+  go('checkout');
+  lucide.createIcons();
+}
+
+let currentPay = null;
+function selectPay(type, btn) {
+  const moyens = produitCourant.moyens || [];
+  const m = moyens.find(x => x.operateur === type);
+  if (!m) return;
+  document.querySelectorAll('#pay-choice .chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('pay-label').textContent = type === 'airtel' ? 'Airtel Money' : 'Moov Money';
+  document.getElementById('pay-number').textContent = m.numero;
+  document.querySelector('#checkout-content p[style*="Bénéficiaire"]').innerHTML = 'Bénéficiaire : ' + (m.nom_beneficiaire || 'Le vendeur');
+  currentPay = type;
+}
+
+function copyPay() {
+  const num = document.getElementById('pay-number').textContent;
+  navigator.clipboard?.writeText(num);
+  toast('Numéro copié ✅');
+}
+
+async function envoyerPreuve() {
+  const p = produitCourant;
+  const file = document.getElementById('preuve-img').files[0];
+  if (!file) { toast('Ajoute une capture d\'écran', true); return; }
+
+  const btn = document.getElementById('envoyer-btn');
+  btn.disabled = true; btn.textContent = 'Envoi...';
+
+  try {
+    // 1. Créer la commande
+    const { data: cmd, error: errCmd } = await sb.from('commandes').insert({
+      client_id: currentUser.id,
+      produit_id: p.id,
+      vendeur_id: p.vendeur_id,
+      montant: p.prix,
+      devise: p.devise || 'FCFA',
+      operateur_paiement: currentPay || (p.moyens[0]?.operateur),
+      statut: 'preuve_envoyee'
+    }).select().single();
+    if (errCmd) throw errCmd;
+
+    // 2. Upload la preuve
+    const ext = file.name.split('.').pop();
+    const path = currentUser.id + '/' + cmd.id + '.' + ext;
+    const { error: errUp } = await sb.storage.from('preuves').upload(path, file);
+    if (errUp) throw errUp;
+
+    // 3. Enregistrer le lien de la preuve
+    await sb.from('preuves_paiement').insert({
+      commande_id: cmd.id,
+      image_url: path
+    });
+
+    toast('Preuve envoyée ✅ Le vendeur va valider');
+    go('achats');
+  } catch (e) {
+    console.error(e);
+    toast('Erreur : ' + (e.message || 'inconnue'), true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Envoyer la preuve';
+  }
+}
+
+// Override go pour checkout
+const _go = go;
+go = function(name) {
+  if (name === 'checkout') { goCheckout(); return; }
+  _go(name);
+};
+
+// ================== ACHATS ==================
+async function chargerAchats() {
+  const el = document.getElementById('achats-list');
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p>';
+  const { data, error } = await sb.from('commandes')
+    .select('*, produits(titre, prix, logo_url, type)')
+    .eq('client_id', currentUser.id)
+    .order('created_at', {ascending:false});
+  if (error || !data || data.length === 0) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Aucun achat pour l\'instant</p>';
+    return;
+  }
+  el.innerHTML = data.map(c => `
+    <div class="card" style="padding:14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="tile" style="width:48px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:14px;aspect-ratio:1"><i data-lucide="package" style="width:22px;height:22px"></i></div>
+        <div style="flex:1;min-width:0">
+          <p style="font-size:13px;font-weight:700">${c.produits?.titre || 'Produit'}</p>
+          <p style="font-size:11px;color:var(--muted);margin-top:2px">${Number(c.montant).toLocaleString('fr-FR')} ${c.devise}</p>
+        </div>
+        <span class="badge ${c.statut === 'validee' ? 'green' : 'yellow'}">${c.statut === 'validee' ? 'Actif' : c.statut === 'preuve_envoyee' ? 'Attente' : c.statut}</span>
+      </div>
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+
+// ================== VENDEUR ==================
+async function chargerMesProduits() {
+  const el = document.getElementById('v-produits');
+  const { data } = await sb.from('produits').select('*').eq('vendeur_id', currentUser.id).order('created_at',{ascending:false});
+  if (!data || data.length === 0) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Aucun produit</p>';
+    return;
+  }
+  el.innerHTML = data.map(p => `
+    <div class="li">
+      <div class="tile" style="width:40px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:10px;aspect-ratio:1"><i data-lucide="package" style="width:18px;height:18px"></i></div>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:12px;font-weight:700">${p.titre}</p>
+        <p style="font-size:10px;color:var(--muted);margin-top:2px">${Number(p.prix).toLocaleString('fr-FR')} FCFA · ${p.statut}</p>
+      </div>
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+
+function togglePay(type) {
+  const cb = document.getElementById('pay-' + type);
+  const input = document.getElementById('num-' + type);
+  input.disabled = !cb.checked;
+  if (cb.checked) input.focus();
+  else input.value = '';
+}
+
+document.getElementById('produit-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('p-btn');
+  btn.disabled = true; btn.textContent = 'Publication...';
+
+  try {
+    const type = document.getElementById('p-type').value;
+    const titre = document.getElementById('p-titre').value.trim();
+    const desc = document.getElementById('p-desc').value.trim();
+    const prix = parseFloat(document.getElementById('p-prix').value);
+    const lien = document.getElementById('p-lien').value.trim();
+
+    const airtelOk = document.getElementById('pay-airtel').checked;
+    const moovOk = document.getElementById('pay-moov').checked;
+    const numAirtel = document.getElementById('num-airtel').value.trim();
+    const numMoov = document.getElementById('num-moov').value.trim();
+
+    if (!airtelOk && !moovOk) { toast('Coche au moins un moyen de paiement', true); return; }
+    if (airtelOk && !numAirtel) { toast('Entre ton numéro Airtel', true); return; }
+    if (moovOk && !numMoov) { toast('Entre ton numéro Moov', true); return; }
+
+    const slug = titre.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+
+    // 1. Upload logo
+    let logo_url = null;
+    const logoFile = document.getElementById('p-logo').files[0];
+    if (logoFile) {
+      const path = currentUser.id + '/' + slug + '.' + logoFile.name.split('.').pop();
+      const { error } = await sb.storage.from('logos').upload(path, logoFile);
+      if (!error) {
+        const { data: pub } = sb.storage.from('logos').getPublicUrl(path);
+        logo_url = pub.publicUrl;
+      }
+    }
+
+    // 2. Upload audio
+    let audio_url = null;
+    const audioFile = document.getElementById('p-audio').files[0];
+    if (audioFile) {
+      const path = currentUser.id + '/' + slug + '-audio.' + audioFile.name.split('.').pop();
+      const { error } = await sb.storage.from('media').upload(path, audioFile);
+      if (!error) {
+        const { data: signed } = await sb.storage.from('media').createSignedUrl(path, 60*60*24*365);
+        audio_url = signed?.signedUrl;
+      }
+    }
+
+    // 3. Upload vidéo
+    let video_url = null;
+    const videoFile = document.getElementById('p-video').files[0];
+    if (videoFile) {
+      const path = currentUser.id + '/' + slug + '-video.' + videoFile.name.split('.').pop();
+      const { error } = await sb.storage.from('media').upload(path, videoFile);
+      if (!error) {
+        const { data: signed } = await sb.storage.from('media').createSignedUrl(path, 60*60*24*365);
+        video_url = signed?.signedUrl;
+      }
+    }
+
+    // 4. Créer le produit
+    const { data: prod, error: errP } = await sb.from('produits').insert({
+      vendeur_id: currentUser.id,
+      type, slug, titre,
+      description_longue: desc,
+      prix, devise: 'FCFA',
+      lien_app_web: lien || null,
+      logo_url, audio_url, video_url,
+      statut: 'publie',
+      published_at: new Date().toISOString()
+    }).select().single();
+    if (errP) throw errP;
+
+    // 5. Moyens de paiement
+    const moyens = [];
+    if (airtelOk) moyens.push({ produit_id: prod.id, operateur: 'airtel', numero: numAirtel, nom_beneficiaire: currentProfile.nom_complet });
+    if (moovOk) moyens.push({ produit_id: prod.id, operateur: 'moov', numero: numMoov, nom_beneficiaire: currentProfile.nom_complet });
+    await sb.from('moyens_paiement').insert(moyens);
+
+    toast('Produit publié ✅');
+    document.getElementById('produit-form').reset();
+    document.getElementById('logo-prev').style.display = 'none';
+    await chargerProduits();
+    go('vendre');
+  } catch (e) {
+    console.error(e);
+    toast('Erreur : ' + (e.message || 'inconnue'), true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Publier le produit';
+  }
+});
+
+// ================== FICHIERS ==================
+function previewFile(e, id) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    const img = document.getElementById(id);
+    img.src = ev.target.result;
+    img.style.display = 'block';
+  };
+  r.readAsDataURL(f);
+}
+
+function checkAudio(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const url = URL.createObjectURL(f);
+  const a = new Audio(url);
+  a.addEventListener('loadedmetadata', () => {
+    const min = a.duration / 60;
+    const info = document.getElementById('audio-info');
+    info.style.display = 'block';
+    if (min > 10) {
+      info.textContent = '❌ Trop long (' + min.toFixed(1) + ' min). Max 10 min.';
+      info.style.color = '#f87171'; e.target.value = '';
+    } else {
+      info.textContent = '✅ Accepté · ' + min.toFixed(1) + ' min';
+      info.style.color = '#4ade80';
+    }
+  });
+}
+
+function checkVideo(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const url = URL.createObjectURL(f);
+  const v = document.createElement('video'); v.preload = 'metadata'; v.src = url;
+  v.addEventListener('loadedmetadata', () => {
+    const min = v.duration / 60;
+    const info = document.getElementById('video-info');
+    info.style.display = 'block';
+    if (min > 3) {
+      info.textContent = '❌ Trop longue (' + min.toFixed(1) + ' min). Max 3 min.';
+      info.style.color = '#f87171'; e.target.value = '';
+    } else {
+      info.textContent = '✅ Acceptée · ' + min.toFixed(1) + ' min';
+      info.style.color = '#4ade80';
+    }
+  });
+}
+
+// ================== TOAST ==================
+let t;
+function toast(msg, err) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.toggle('err', !!err);
+  el.classList.add('on');
+  clearTimeout(t);
+  t = setTimeout(() => el.classList.remove('on'), 3000);
+}
+</script>
+</body>
+</html>
