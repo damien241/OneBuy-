@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
 <meta name="theme-color" content="#0a0a0f" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="author" content="Damien (Starly Koumba)" />
 <title>OneBuy</title>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -13,93 +12,99 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 <style>
-  *{font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;box-sizing:border-box}
-  html,body{height:100%;margin:0;padding:0;overscroll-behavior:none;user-select:none}
-  body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:hidden}
-  :root{
-    --violet:#8b5cf6;--violet-deep:#6d28d9;--bg:#0a0a0f;--card:#141420;
-    --card-hi:#1c1c2e;--border:rgba(255,255,255,.06);--muted:#8a8a9c;
-  }
-  .app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg)}
-  .status-bar{height:env(safe-area-inset-top);min-height:env(safe-area-inset-top)}
-  .appbar{height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
-  .appbar h1{font-size:22px;font-weight:800;letter-spacing:-.5px}
-  .icon-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);color:#fff;border:none;transition:transform .15s}
-  .icon-btn:active{transform:scale(.92)}
-  .content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
-  .content::-webkit-scrollbar{display:none}
-  .tabbar{position:absolute;left:0;right:0;bottom:0;height:calc(64px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:rgba(10,10,15,.92);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-top:1px solid var(--border);display:flex;align-items:flex-start;padding-top:8px}
-  .tabbar.hide{display:none}
-  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);background:none;border:none;padding:6px 0;font-size:10px;font-weight:600;transition:color .2s;position:relative}
-  .tab svg{width:22px;height:22px;stroke-width:2}
-  .tab.on{color:var(--violet)}
-  .tab.on::before{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:20px;height:3px;border-radius:2px;background:var(--violet)}
-  .tab.hidden{display:none}
-  .scr{display:none;animation:in .28s cubic-bezier(.22,1,.36,1)}
-  .scr.on{display:block}
-  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  .card{background:var(--card);border-radius:18px;border:1px solid var(--border)}
-  .tile{aspect-ratio:1;border-radius:16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-  .tile svg{width:34px;height:34px;color:#fff;position:relative;z-index:1}
-  .tile::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent 60%)}
-  .press{transition:transform .12s}
-  .press:active{transform:scale(.96)}
-  .btn{width:100%;padding:16px;border:none;border-radius:16px;font-size:15px;font-weight:700;letter-spacing:-.2px;background:var(--violet);color:#fff;transition:transform .12s,background .2s}
-  .btn:active{transform:scale(.97);background:var(--violet-deep)}
-  .btn.ghost{background:var(--card-hi);color:#fff}
-  .btn:disabled{opacity:.4;pointer-events:none}
-  .field{margin-bottom:14px}
-  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
-  .field input,.field textarea,.field select{width:100%;padding:15px 16px;font-size:15px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;color:#fff;font-family:inherit;transition:border-color .2s}
-  .field input::placeholder,.field textarea::placeholder{color:#5a5a6c}
-  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--violet);outline:none}
-  .field textarea{resize:none;min-height:90px}
-  .field .hint{font-size:11px;color:var(--muted);margin-top:6px}
-  .upload{display:block;padding:22px 16px;text-align:center;background:var(--card);border:1.5px dashed rgba(139,92,246,.25);border-radius:16px;cursor:pointer;transition:border-color .2s}
-  .upload:active{border-color:var(--violet)}
-  .upload svg{width:22px;height:22px;color:var(--violet);margin:0 auto 8px}
-  .chip{padding:8px 14px;border-radius:12px;font-size:13px;font-weight:600;white-space:nowrap;background:var(--card);border:1px solid var(--border);color:#fff;transition:all .15s}
-  .chip.on{background:var(--violet);border-color:var(--violet)}
-  .splash{position:fixed;inset:0;z-index:100;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
-  .splash.out{opacity:0;pointer-events:none}
-  .logo-mark{font-size:44px;font-weight:900;letter-spacing:-2px;background:linear-gradient(135deg,#a78bfa,#8b5cf6 60%,#6d28d9);-webkit-background-clip:text;background-clip:text;color:transparent;animation:zoom .7s cubic-bezier(.22,1,.36,1)}
-  .logo-sub{font-size:11px;color:var(--muted);margin-top:14px;letter-spacing:1px}
-  @keyframes zoom{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
-  .loader{margin-top:26px;width:22px;height:22px;border-radius:50%;border:2.5px solid rgba(139,92,246,.2);border-top-color:var(--violet);animation:spin .7s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--violet);color:#fff;padding:12px 20px;border-radius:14px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all .3s;z-index:200;max-width:90vw;text-align:center}
-  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-  .toast.err{background:#dc2626}
-  .sect{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin:26px 0 12px}
-  .sect h2{font-size:17px;font-weight:800;letter-spacing:-.3px}
-  .sect button{font-size:12px;color:var(--violet);font-weight:700;background:none;border:none}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
-  .hero{margin:0 16px;padding:20px;border-radius:22px;background:linear-gradient(135deg,#7c3aed,#5b21b6 70%,#3b0764);position:relative;overflow:hidden}
-  .hero h3{font-size:19px;font-weight:800;line-height:1.2;letter-spacing:-.4px;position:relative}
-  .hero p{font-size:12px;color:rgba(255,255,255,.75);margin-top:6px;position:relative}
-  .hero button{margin-top:16px;padding:10px 18px;background:#fff;color:#4c1d95;border:none;border-radius:12px;font-size:12px;font-weight:800;position:relative}
-  .back{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);border:none;color:#fff}
-  .badge{padding:4px 8px;border-radius:8px;font-size:10px;font-weight:700}
-  .badge.green{background:rgba(34,197,94,.15);color:#4ade80}
-  .badge.yellow{background:rgba(234,179,8,.15);color:#facc15}
-  .avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800}
-  .search{margin:0 16px;position:relative}
-  .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}
-  .search input{width:100%;padding:13px 16px 13px 40px;background:var(--card);border:1px solid var(--border);border-radius:14px;color:#fff;font-size:14px;font-family:inherit}
-  .search input:focus{outline:none;border-color:var(--violet)}
-  .chips{display:flex;gap:8px;overflow-x:auto;padding:14px 16px 4px}
-  .chips::-webkit-scrollbar{display:none}
-  .li{display:flex;align-items:center;gap:12px;padding:14px;background:var(--card);border-radius:14px;border:1px solid var(--border)}
-  .role-card{padding:28px 20px;border-radius:22px;background:var(--card);border:1.5px solid var(--border);text-align:center;transition:all .2s;cursor:pointer;position:relative}
-  .role-card:active{transform:scale(.97)}
-  .role-card.sel{border-color:var(--violet);background:linear-gradient(180deg,rgba(139,92,246,.15),rgba(139,92,246,.05))}
-  .role-card .ic{width:64px;height:64px;border-radius:20px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
-  .role-card .ic svg{width:30px;height:30px;color:#fff}
-  .role-card h3{font-size:16px;font-weight:800;letter-spacing:-.3px}
-  .role-card p{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
-  .steps{display:flex;justify-content:center;gap:6px;margin-bottom:24px}
-  .steps span{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.15)}
-  .steps span.on{background:var(--violet);width:18px}
+*{font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+html,body{height:100%;margin:0;padding:0;overscroll-behavior:none;user-select:none}
+body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:hidden}
+:root{--violet:#8b5cf6;--violet-deep:#6d28d9;--bg:#0a0a0f;--card:#141420;--card-hi:#1c1c2e;--border:rgba(255,255,255,.06);--muted:#8a8a9c}
+.app{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg)}
+.status-bar{height:env(safe-area-inset-top);min-height:env(safe-area-inset-top)}
+.appbar{height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.appbar h1{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.icon-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);color:#fff;border:none;transition:transform .15s;position:relative}
+.icon-btn:active{transform:scale(.92)}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 8px #ef4444}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+.content::-webkit-scrollbar{display:none}
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:calc(64px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:rgba(10,10,15,.92);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-top:1px solid var(--border);display:flex;align-items:flex-start;padding-top:8px}
+.tabbar.hide{display:none}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);background:none;border:none;padding:6px 0;font-size:10px;font-weight:600;transition:color .2s;position:relative}
+.tab svg{width:22px;height:22px;stroke-width:2}
+.tab.on{color:var(--violet)}
+.tab.on::before{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:20px;height:3px;border-radius:2px;background:var(--violet)}
+.tab.hidden{display:none}
+.scr{display:none;animation:in .28s cubic-bezier(.22,1,.36,1)}
+.scr.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--card);border-radius:18px;border:1px solid var(--border)}
+.tile{aspect-ratio:1;border-radius:16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.tile svg{width:34px;height:34px;color:#fff;position:relative;z-index:1}
+.tile::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent 60%)}
+.press{transition:transform .12s}
+.press:active{transform:scale(.96)}
+.btn{width:100%;padding:16px;border:none;border-radius:16px;font-size:15px;font-weight:700;letter-spacing:-.2px;background:var(--violet);color:#fff;transition:transform .12s,background .2s}
+.btn:active{transform:scale(.97);background:var(--violet-deep)}
+.btn.ghost{background:var(--card-hi);color:#fff}
+.btn:disabled{opacity:.4;pointer-events:none}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.field input,.field textarea,.field select{width:100%;padding:15px 16px;font-size:15px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;color:#fff;font-family:inherit;transition:border-color .2s}
+.field input::placeholder,.field textarea::placeholder{color:#5a5a6c}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--violet);outline:none}
+.field textarea{resize:none;min-height:90px}
+.field .hint{font-size:11px;color:var(--muted);margin-top:6px}
+.upload{display:block;padding:22px 16px;text-align:center;background:var(--card);border:1.5px dashed rgba(139,92,246,.25);border-radius:16px;cursor:pointer;transition:border-color .2s}
+.upload:active{border-color:var(--violet)}
+.upload svg{width:22px;height:22px;color:var(--violet);margin:0 auto 8px}
+.chip{padding:8px 14px;border-radius:12px;font-size:13px;font-weight:600;white-space:nowrap;background:var(--card);border:1px solid var(--border);color:#fff;transition:all .15s}
+.chip.on{background:var(--violet);border-color:var(--violet)}
+.splash{position:fixed;inset:0;z-index:100;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
+.splash.out{opacity:0;pointer-events:none}
+.logo-mark{font-size:44px;font-weight:900;letter-spacing:-2px;background:linear-gradient(135deg,#a78bfa,#8b5cf6 60%,#6d28d9);-webkit-background-clip:text;background-clip:text;color:transparent;animation:zoom .7s cubic-bezier(.22,1,.36,1)}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:14px;letter-spacing:1px}
+@keyframes zoom{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.loader{margin-top:26px;width:22px;height:22px;border-radius:50%;border:2.5px solid rgba(139,92,246,.2);border-top-color:var(--violet);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--violet);color:#fff;padding:12px 20px;border-radius:14px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all .3s;z-index:200;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:#dc2626}
+.sect{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin:26px 0 12px}
+.sect h2{font-size:17px;font-weight:800;letter-spacing:-.3px}
+.sect button{font-size:12px;color:var(--violet);font-weight:700;background:none;border:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
+.hero{margin:0 16px;padding:20px;border-radius:22px;background:linear-gradient(135deg,#7c3aed,#5b21b6 70%,#3b0764);position:relative;overflow:hidden}
+.hero h3{font-size:19px;font-weight:800;line-height:1.2;letter-spacing:-.4px;position:relative}
+.hero p{font-size:12px;color:rgba(255,255,255,.75);margin-top:6px;position:relative}
+.hero button{margin-top:16px;padding:10px 18px;background:#fff;color:#4c1d95;border:none;border-radius:12px;font-size:12px;font-weight:800;position:relative}
+.back{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);border:none;color:#fff}
+.badge{padding:4px 8px;border-radius:8px;font-size:10px;font-weight:700}
+.badge.green{background:rgba(34,197,94,.15);color:#4ade80}
+.badge.yellow{background:rgba(234,179,8,.15);color:#facc15}
+.badge.red{background:rgba(239,68,68,.15);color:#f87171}
+.avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800}
+.search{margin:0 16px;position:relative}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}
+.search input{width:100%;padding:13px 16px 13px 40px;background:var(--card);border:1px solid var(--border);border-radius:14px;color:#fff;font-size:14px;font-family:inherit}
+.search input:focus{outline:none;border-color:var(--violet)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:14px 16px 4px}
+.chips::-webkit-scrollbar{display:none}
+.li{display:flex;align-items:center;gap:12px;padding:14px;background:var(--card);border-radius:14px;border:1px solid var(--border)}
+.role-card{padding:28px 20px;border-radius:22px;background:var(--card);border:1.5px solid var(--border);text-align:center;transition:all .2s;cursor:pointer}
+.role-card:active{transform:scale(.97)}
+.role-card.sel{border-color:var(--violet);background:linear-gradient(180deg,rgba(139,92,246,.15),rgba(139,92,246,.05))}
+.role-card .ic{width:64px;height:64px;border-radius:20px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
+.role-card .ic svg{width:30px;height:30px;color:#fff}
+.role-card h3{font-size:16px;font-weight:800}
+.role-card p{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+.steps{display:flex;justify-content:center;gap:6px;margin-bottom:24px}
+.steps span{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.15)}
+.steps span.on{background:var(--violet);width:18px}
+.preview-badge{background:rgba(139,92,246,.15);color:var(--violet);font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;display:inline-block;margin-top:6px}
+.chat-bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.4;word-wrap:break-word}
+.chat-bubble.me{background:var(--violet);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-bubble.them{background:var(--card-hi);color:#fff;align-self:flex-start;border-bottom-left-radius:4px}
+.stars{display:flex;gap:2px}
+.star{width:20px;height:20px;cursor:pointer;color:#3a3a4c;transition:color .15s}
+.star.on{color:#facc15;fill:#facc15}
 </style>
 </head>
 <body>
@@ -116,7 +121,10 @@
   <header class="appbar" id="appbar">
     <h1 id="title">OneBuy</h1>
     <div id="appbar-actions" style="display:none;gap:8px">
-      <button class="icon-btn" onclick="toast('Bientôt')"><i data-lucide="search" style="width:18px;height:18px"></i></button>
+      <button class="icon-btn" onclick="go('notifications')" id="notif-btn">
+        <i data-lucide="bell" style="width:18px;height:18px"></i>
+        <span class="notif-dot" id="notif-dot" style="display:none"></span>
+      </button>
       <button class="icon-btn" onclick="go('achats')"><i data-lucide="shopping-bag" style="width:18px;height:18px"></i></button>
     </div>
   </header>
@@ -126,7 +134,7 @@
     <section class="scr on" id="s-role">
       <div style="padding:20px 24px 0">
         <div class="logo-mark" style="font-size:36px;text-align:center">OneBuy</div>
-        <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5">Comment souhaitez-vous utiliser OneBuy ?</p>
+        <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:12px">Comment souhaitez-vous utiliser OneBuy ?</p>
         <div style="display:grid;gap:14px;margin-top:32px">
           <div class="role-card" id="rc-client" onclick="pickRole('client')">
             <div class="ic" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)"><i data-lucide="shopping-bag"></i></div>
@@ -185,7 +193,7 @@
     </section>
 
     <section class="scr" id="s-accueil">
-      <div class="search"><i data-lucide="search"></i><input placeholder="Rechercher une application..." id="search-input" oninput="filtrerProduits()" /></div>
+      <div class="search"><i data-lucide="search"></i><input placeholder="Rechercher..." id="search-input" oninput="filtrerProduits()" /></div>
       <div class="chips">
         <button class="chip on" onclick="filtreCategorie('tous', this)">Tout</button>
         <button class="chip" onclick="filtreCategorie('app_web', this)">Apps web</button>
@@ -214,20 +222,37 @@
     </section>
 
     <section class="scr" id="s-produit">
-      <div style="padding:0 16px" id="produit-detail">
-        <p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p>
-      </div>
+      <div style="padding:0 16px" id="produit-detail"><p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p></div>
     </section>
 
     <section class="scr" id="s-checkout">
-      <div style="padding:0 16px" id="checkout-content">
-        <p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p>
-      </div>
+      <div style="padding:0 16px" id="checkout-content"><p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p></div>
     </section>
 
     <section class="scr" id="s-achats">
-      <div style="padding:0 16px" id="achats-list">
-        <p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Aucun achat pour l'instant</p>
+      <div style="padding:0 16px" id="achats-list"><p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p></div>
+    </section>
+
+    <section class="scr" id="s-notifications">
+      <div style="padding:0 16px" id="notifications-list"><p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p></div>
+    </section>
+
+    <section class="scr" id="s-chat">
+      <div style="padding:0 16px;display:flex;flex-direction:column;height:calc(100vh - 140px)">
+        <div style="display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+          <button class="back" onclick="fermerChat()"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:14px;font-weight:700" id="chat-titre">Conversation</p>
+            <p style="font-size:11px;color:var(--muted)" id="chat-sous-titre">...</p>
+          </div>
+        </div>
+        <div id="chat-messages" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:14px 0">
+          <p style="color:var(--muted);font-size:13px;text-align:center">Chargement...</p>
+        </div>
+        <div style="display:flex;gap:8px;padding:10px 0;border-top:1px solid var(--border)">
+          <input type="text" id="chat-input" placeholder="Écrire un message..." style="flex:1;padding:12px 16px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;color:#fff;font-family:inherit;font-size:14px" />
+          <button class="btn" style="width:auto;padding:12px 20px" onclick="envoyerMessage()"><i data-lucide="send" style="width:18px;height:18px"></i></button>
+        </div>
       </div>
     </section>
 
@@ -243,10 +268,10 @@
         <button class="btn" style="margin-top:20px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="go('ajouter')">
           <i data-lucide="plus" style="width:18px;height:18px"></i> Ajouter un produit
         </button>
+        <div class="sect" style="padding:0;margin:24px 0 10px"><h2 style="font-size:15px">📥 Commandes à valider</h2></div>
+        <div id="v-commandes" style="display:flex;flex-direction:column;gap:8px"><p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Chargement...</p></div>
         <div class="sect" style="padding:0;margin:24px 0 10px"><h2 style="font-size:15px">Mes produits</h2></div>
-        <div id="v-produits" style="display:flex;flex-direction:column;gap:8px;margin-bottom:30px">
-          <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Aucun produit</p>
-        </div>
+        <div id="v-produits" style="display:flex;flex-direction:column;gap:8px;margin-bottom:30px"><p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Aucun produit</p></div>
       </div>
     </section>
 
@@ -255,17 +280,11 @@
         <button class="back" onclick="go('vendre')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
         <h2 style="font-size:20px;font-weight:800;margin-top:18px">Nouveau produit</h2>
         <form id="produit-form" style="margin-top:20px">
-          <div class="field">
-            <label>Type de produit</label>
-            <select id="p-type"><option value="app_web">Application web</option><option value="livre_audio">Livre audio</option><option value="video">Vidéo</option></select>
-          </div>
+          <div class="field"><label>Type de produit</label><select id="p-type"><option value="app_web">Application web</option><option value="livre_audio">Livre audio</option><option value="video">Vidéo</option></select></div>
           <div class="field"><label>Titre</label><input type="text" id="p-titre" required placeholder="Ex : Asha Manager" /></div>
           <div class="field"><label>Description</label><textarea id="p-desc" required placeholder="Décrivez votre produit..."></textarea></div>
           <div class="field"><label>Prix (FCFA)</label><input type="number" id="p-prix" required placeholder="5000" /></div>
-          <div class="field">
-            <label style="display:flex;align-items:center;gap:6px"><i data-lucide="link" style="width:12px;height:12px;color:var(--violet)"></i>Lien de l'application web</label>
-            <input type="url" id="p-lien" placeholder="https://mon-app.com" />
-          </div>
+          <div class="field"><label style="display:flex;align-items:center;gap:6px"><i data-lucide="link" style="width:12px;height:12px;color:var(--violet)"></i>Lien de l'application web</label><input type="url" id="p-lien" placeholder="https://mon-app.com" /></div>
 
           <div class="field">
             <label>Moyens de paiement acceptés</label>
@@ -286,32 +305,33 @@
           </div>
 
           <div class="field">
-            <label>Logo du produit (image)</label>
+            <label>Logo du produit</label>
             <label class="upload">
               <input type="file" accept="image/*" id="p-logo" hidden onchange="previewFile(event,'logo-prev')" />
               <i data-lucide="image"></i>
               <p style="font-size:13px;font-weight:600">Choisir une image</p>
-              <p style="font-size:11px;color:var(--muted);margin-top:4px">JPG, PNG — max 5 Mo</p>
             </label>
             <img id="logo-prev" style="display:none;width:100px;height:100px;object-fit:cover;border-radius:12px;margin-top:10px" />
           </div>
 
           <div class="field">
-            <label>Aperçu audio (10 min max) — optionnel</label>
+            <label>Aperçu audio (30 min max) — optionnel</label>
             <label class="upload">
               <input type="file" accept="audio/*" id="p-audio" hidden onchange="checkAudio(event)" />
               <i data-lucide="music"></i>
               <p style="font-size:13px;font-weight:600">Choisir un audio</p>
+              <p style="font-size:11px;color:var(--muted);margin-top:4px">Le client n'écoutera que 30 sec</p>
             </label>
             <p id="audio-info" style="display:none;font-size:11px;margin-top:8px"></p>
           </div>
 
           <div class="field">
-            <label>Aperçu vidéo (3 min max) — optionnel</label>
+            <label>Aperçu vidéo (1h30 max) — optionnel</label>
             <label class="upload">
               <input type="file" accept="video/*" id="p-video" hidden onchange="checkVideo(event)" />
               <i data-lucide="film"></i>
               <p style="font-size:13px;font-weight:600">Choisir une vidéo</p>
+              <p style="font-size:11px;color:var(--muted);margin-top:4px">Le client ne verra que 30 sec</p>
             </label>
             <p id="video-info" style="display:none;font-size:11px;margin-top:8px"></p>
           </div>
@@ -364,53 +384,40 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ================== CONFIG SUPABASE ==================
+// ===== CONFIG SUPABASE =====
 const SUPABASE_URL = "https://ijannxjdcrzaiexnzhqk.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqYW5ueGpkY3J6YWlleG56aHFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5OTAzOTcsImV4cCI6MjEwNzU2NjM5N30.xziX17R1bbEFFYPMoKYRUvt0uZDU9LMlANoRMcjoo60";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ================== STATE ==================
-let currentUser = null;
-let currentProfile = null;
-let currentRole = null;
-let chosenRole = null;
-let allProduits = [];
-let filtreActif = 'tous';
-let produitCourant = null;
-let currentPay = null;
+// ===== STATE =====
+let currentUser=null, currentProfile=null, currentRole=null, chosenRole=null;
+let allProduits=[], filtreActif='tous', produitCourant=null, currentPay=null;
+let currentCommandeChat=null, chatChannel=null, realtimeChannel=null, notifChannel=null;
+let notesAvis=0;
 
-const VENDEUR_ONLY = ['vendre', 'ajouter'];
+const VENDEUR_ONLY=['vendre','ajouter'];
 const config = {
-  role:{t:'',bar:false,tab:false},
-  signup:{t:'',bar:false,tab:false},
-  login:{t:'',bar:false,tab:false},
-  accueil:{t:'OneBuy',bar:true,tab:true},
-  apps:{t:'Explorer',bar:true,tab:true},
-  produit:{t:'',bar:false,tab:true},
-  checkout:{t:'Paiement',bar:false,tab:true},
-  achats:{t:'Mes achats',bar:true,tab:true},
-  vendre:{t:'Vendre',bar:true,tab:true},
-  ajouter:{t:'',bar:false,tab:true},
-  compte:{t:'Compte',bar:true,tab:true}
+  role:{t:'',bar:false,tab:false}, signup:{t:'',bar:false,tab:false}, login:{t:'',bar:false,tab:false},
+  accueil:{t:'OneBuy',bar:true,tab:true}, apps:{t:'Explorer',bar:true,tab:true},
+  produit:{t:'',bar:false,tab:true}, checkout:{t:'Paiement',bar:false,tab:true},
+  achats:{t:'Mes achats',bar:true,tab:true}, notifications:{t:'Notifications',bar:true,tab:false},
+  chat:{t:'',bar:false,tab:false}, vendre:{t:'Vendre',bar:true,tab:true},
+  ajouter:{t:'',bar:false,tab:true}, compte:{t:'Compte',bar:true,tab:true}
 };
 
 lucide.createIcons();
 
-// ================== NAVIGATION (définie AVANT les appels) ==================
-function _go(name) {
-  if (currentRole === 'client' && VENDEUR_ONLY.includes(name)) {
-    toast('Accès réservé aux vendeurs', true); name = 'accueil';
-  }
-  if (!currentUser && !['role','signup','login'].includes(name)) {
-    name = 'role';
-  }
+// ===== NAVIGATION =====
+function _go(name){
+  if(currentRole==='client' && VENDEUR_ONLY.includes(name)){ toast('Accès réservé aux vendeurs',true); name='accueil'; }
+  if(!currentUser && !['role','signup','login'].includes(name)) name='role';
   const c = config[name] || {t:'OneBuy',bar:true,tab:true};
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   const target = document.getElementById('s-'+name);
-  if (target) target.classList.add('on');
+  if(target) target.classList.add('on');
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   const tab = document.querySelector('.tab[data-tab="'+name+'"]');
-  if (tab) tab.classList.add('on');
+  if(tab) tab.classList.add('on');
   document.getElementById('title').textContent = c.t;
   document.getElementById('appbar-actions').style.display = c.bar ? 'flex' : 'none';
   document.getElementById('appbar').style.visibility = c.t ? 'visible' : 'hidden';
@@ -418,201 +425,220 @@ function _go(name) {
   document.getElementById('content').scrollTop = 0;
   lucide.createIcons();
 
-  if (name === 'signup' && chosenRole) {
-    document.getElementById('signup-role-label').textContent = 'Profil : ' + (chosenRole === 'vendeur' ? 'Vendeur' : 'Client');
-  }
-  if (name === 'vendre') chargerMesProduits();
-  if (name === 'achats') chargerAchats();
+  if(name==='signup' && chosenRole) document.getElementById('signup-role-label').textContent = 'Profil : ' + (chosenRole==='vendeur'?'Vendeur':'Client');
+  if(name==='vendre'){ chargerMesProduits(); chargerCommandesRecues(); }
+  if(name==='achats') chargerAchats();
+  if(name==='notifications') chargerNotifications();
 }
 
-function go(name) {
-  // ✅ FIX : intercepte checkout pour construire le contenu dynamique AVANT d'afficher
-  if (name === 'checkout') {
-    buildCheckout();
-    _go('checkout');
-    return;
-  }
+function go(name){
+  if(name==='checkout'){ buildCheckout(); _go('checkout'); return; }
   _go(name);
 }
 
-// ================== INIT ==================
-async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await loadProfile();
-    await afterLogin();
-  } else {
-    _go('role');
-  }
-  setTimeout(() => {
+// ===== INIT =====
+async function init(){
+  const {data:{session}} = await sb.auth.getSession();
+  if(session){ currentUser=session.user; await loadProfile(); await afterLogin(); }
+  else _go('role');
+  setTimeout(()=>{
     document.getElementById('splash').classList.add('out');
-    document.getElementById('app').style.display = 'flex';
-    setTimeout(() => document.getElementById('splash').remove(), 600);
-  }, 1500);
+    document.getElementById('app').style.display='flex';
+    setTimeout(()=>document.getElementById('splash').remove(),600);
+  },1500);
 }
 init();
 
-// ================== AUTH ==================
-document.getElementById('signup-form').addEventListener('submit', async (e) => {
+// ===== AUTH =====
+document.getElementById('signup-form').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const btn = document.getElementById('su-btn');
-  btn.disabled = true; btn.textContent = 'Création...';
-  const nom = document.getElementById('su-nom').value.trim();
-  const email = document.getElementById('su-email').value.trim();
-  const tel = document.getElementById('su-tel').value.trim();
-  const ville = document.getElementById('su-ville').value.trim();
-  const pwd = document.getElementById('su-pwd').value;
-
-  const { data, error } = await sb.auth.signUp({
-    email, password: pwd,
-    options: { data: { nom_complet: nom, telephone: tel, ville, role: chosenRole || 'client' } }
-  });
-
-  btn.disabled = false; btn.textContent = 'Créer mon compte';
-
-  if (error) { toast(error.message, true); return; }
-  if (data.user && !data.session) {
-    toast('Vérifie ton email pour confirmer ton compte', true);
-    _go('login');
-    return;
-  }
-  currentUser = data.user;
+  btn.disabled=true; btn.textContent='Création...';
+  const nom=document.getElementById('su-nom').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const tel=document.getElementById('su-tel').value.trim();
+  const ville=document.getElementById('su-ville').value.trim();
+  const pwd=document.getElementById('su-pwd').value;
+  const {data,error} = await sb.auth.signUp({email,password:pwd,options:{data:{nom_complet:nom,telephone:tel,ville,role:chosenRole||'client'}}});
+  btn.disabled=false; btn.textContent='Créer mon compte';
+  if(error){ toast(error.message,true); return; }
+  if(data.user && !data.session){ toast('Vérifie ton email',true); _go('login'); return; }
+  currentUser=data.user;
   await loadProfile();
   toast('Compte créé ✅');
   await afterLogin();
 });
 
-document.getElementById('login-form').addEventListener('submit', async (e) => {
+document.getElementById('login-form').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const btn = document.getElementById('li-btn');
-  btn.disabled = true; btn.textContent = 'Connexion...';
-  const email = document.getElementById('li-email').value.trim();
-  const pwd = document.getElementById('li-pwd').value;
-
-  const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
-  btn.disabled = false; btn.textContent = 'Se connecter';
-
-  if (error) { toast(error.message, true); return; }
-
-  currentUser = data.user;
+  btn.disabled=true; btn.textContent='Connexion...';
+  const email=document.getElementById('li-email').value.trim();
+  const pwd=document.getElementById('li-pwd').value;
+  const {data,error} = await sb.auth.signInWithPassword({email,password:pwd});
+  btn.disabled=false; btn.textContent='Se connecter';
+  if(error){ toast(error.message,true); return; }
+  currentUser=data.user;
   await loadProfile();
   toast('Bienvenue ✅');
   await afterLogin();
 });
 
-async function loadProfile() {
-  const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-  currentProfile = data;
-  currentRole = data?.role || 'client';
+async function loadProfile(){
+  const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  currentProfile=data;
+  currentRole=data?.role || 'client';
 }
 
-async function afterLogin() {
+async function afterLogin(){
   applyRole();
   await chargerProduits();
+  await chargerNotifications();
+  subscribeRealtime();
   _go('accueil');
 }
 
-async function logout() {
+async function logout(){
+  if(realtimeChannel) sb.removeChannel(realtimeChannel);
+  if(notifChannel) sb.removeChannel(notifChannel);
+  if(chatChannel) sb.removeChannel(chatChannel);
   await sb.auth.signOut();
-  currentUser = null; currentProfile = null; currentRole = null; chosenRole = null; allProduits = []; produitCourant = null;
+  currentUser=null; currentProfile=null; currentRole=null; chosenRole=null; allProduits=[];
   document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));
-  document.getElementById('role-next').disabled = true;
+  document.getElementById('role-next').disabled=true;
   applyRole();
   _go('role');
 }
 
-// ================== ROLES ==================
-function pickRole(role) {
-  chosenRole = role;
+// ===== ROLES =====
+function pickRole(role){
+  chosenRole=role;
   document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));
   document.getElementById('rc-'+role).classList.add('sel');
-  document.getElementById('role-next').disabled = false;
+  document.getElementById('role-next').disabled=false;
 }
 
-function applyRole() {
+function applyRole(){
   document.querySelectorAll('.tab').forEach(t=>{
-    const needed = t.dataset.role;
-    if (needed && needed !== currentRole) t.classList.add('hidden');
+    const needed=t.dataset.role;
+    if(needed && needed!==currentRole) t.classList.add('hidden');
     else t.classList.remove('hidden');
   });
-  const menuVendeur = document.getElementById('menu-vendeur');
-  if (menuVendeur) menuVendeur.style.display = (currentRole === 'vendeur') ? 'flex' : 'none';
-
-  if (currentProfile) {
-    const initiale = (currentProfile.nom_complet || 'U')[0].toUpperCase();
-    document.getElementById('c-avatar').textContent = initiale;
-    document.getElementById('c-nom').textContent = currentProfile.nom_complet;
-    document.getElementById('c-email').textContent = currentProfile.email;
-    document.getElementById('v-avatar').textContent = initiale;
-    document.getElementById('v-nom').textContent = currentProfile.nom_complet;
+  const mv = document.getElementById('menu-vendeur');
+  if(mv) mv.style.display = (currentRole==='vendeur') ? 'flex' : 'none';
+  if(currentProfile){
+    const i = (currentProfile.nom_complet||'U')[0].toUpperCase();
+    document.getElementById('c-avatar').textContent=i;
+    document.getElementById('c-nom').textContent=currentProfile.nom_complet;
+    document.getElementById('c-email').textContent=currentProfile.email;
+    document.getElementById('v-avatar').textContent=i;
+    document.getElementById('v-nom').textContent=currentProfile.nom_complet;
   }
 }
 
-// ================== PRODUITS ==================
-async function chargerProduits() {
-  const { data, error } = await sb.from('produits').select('*').eq('statut','publie').order('created_at',{ascending:false});
-  if (error) { console.error(error); return; }
+// ===== REALTIME =====
+function subscribeRealtime(){
+  if(realtimeChannel) sb.removeChannel(realtimeChannel);
+  realtimeChannel = sb.channel('rt-onebuy')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'commandes',filter:'vendeur_id=eq.'+currentUser.id},(payload)=>{
+      toast('🔔 Nouvelle commande reçue !');
+      if(document.getElementById('s-vendre').classList.contains('on')) chargerCommandesRecues();
+      chargerNotifications();
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'commandes',filter:'client_id=eq.'+currentUser.id},(payload)=>{
+      if(payload.new.statut==='validee'){
+        toast('✅ Ta commande est validée ! Accès débloqué');
+        if(document.getElementById('s-achats').classList.contains('on')) chargerAchats();
+        chargerNotifications();
+      } else if(payload.new.statut==='refusee'){
+        toast('❌ Ta commande a été refusée',true);
+        chargerAchats();
+      }
+    })
+    .subscribe();
+}
+
+// ===== PRODUITS =====
+async function chargerProduits(){
+  const {data,error} = await sb.from('produits').select('*').eq('statut','publie').order('created_at',{ascending:false});
+  if(error){ console.error(error); return; }
   allProduits = data || [];
   afficherProduits();
 }
 
-function afficherProduits() {
+function afficherProduits(){
   const q = (document.getElementById('search-input')?.value || '').toLowerCase();
-  let liste = allProduits.filter(p => p.titre.toLowerCase().includes(q));
-  if (filtreActif !== 'tous') liste = liste.filter(p => p.type === filtreActif);
-
-  const html = liste.length === 0
-    ? '<p style="color:var(--muted);font-size:13px;padding:0 16px">Aucun produit pour l\'instant</p>'
-    : liste.map(p => carteProduit(p)).join('');
-
-  const el1 = document.getElementById('accueil-produits');
-  const el2 = document.getElementById('apps-produits');
-  if (el1) el1.innerHTML = html;
-  if (el2) el2.innerHTML = html;
+  let liste = allProduits.filter(p=>p.titre.toLowerCase().includes(q));
+  if(filtreActif!=='tous') liste = liste.filter(p=>p.type===filtreActif);
+  const html = liste.length===0
+    ? '<p style="color:var(--muted);font-size:13px;padding:0 16px">Aucun produit</p>'
+    : liste.map(carteProduit).join('');
+  const e1=document.getElementById('accueil-produits'), e2=document.getElementById('apps-produits');
+  if(e1) e1.innerHTML=html;
+  if(e2) e2.innerHTML=html;
   lucide.createIcons();
 }
 
-function carteProduit(p) {
-  const grad = p.type === 'app_web' ? 'linear-gradient(135deg,#8b5cf6,#6d28d9)'
-    : p.type === 'livre_audio' ? 'linear-gradient(135deg,#3b82f6,#1e40af)'
-    : 'linear-gradient(135deg,#ec4899,#831843)';
-  const icone = p.type === 'app_web' ? 'layout-grid' : p.type === 'livre_audio' ? 'headphones' : 'video';
-  const logo = p.logo_url
-    ? '<img src="'+p.logo_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:16px;position:absolute;inset:0" />'
-    : '<i data-lucide="'+icone+'"></i>';
-
-  return `
-    <div class="press" onclick="ouvrirProduit('${p.id}')">
-      <div class="tile" style="background:${grad};position:relative">${logo}</div>
-      <p style="font-weight:700;font-size:13px;margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titre}</p>
-      <p style="font-size:11px;color:var(--muted);margin-top:2px">${p.ventes || 0} ventes</p>
-      <p style="font-size:13px;font-weight:800;color:var(--violet);margin-top:6px">${Number(p.prix).toLocaleString('fr-FR')} ${p.devise||'FCFA'}</p>
-    </div>`;
+function carteProduit(p){
+  const grad = p.type==='app_web'?'linear-gradient(135deg,#8b5cf6,#6d28d9)':p.type==='livre_audio'?'linear-gradient(135deg,#3b82f6,#1e40af)':'linear-gradient(135deg,#ec4899,#831843)';
+  const ic = p.type==='app_web'?'layout-grid':p.type==='livre_audio'?'headphones':'video';
+  const logo = p.logo_url?'<img src="'+p.logo_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:16px;position:absolute;inset:0" />':'<i data-lucide="'+ic+'"></i>';
+  return `<div class="press" onclick="ouvrirProduit('${p.id}')">
+    <div class="tile" style="background:${grad};position:relative">${logo}</div>
+    <p style="font-weight:700;font-size:13px;margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titre}</p>
+    <p style="font-size:11px;color:var(--muted);margin-top:2px">${p.ventes||0} ventes</p>
+    <p style="font-size:13px;font-weight:800;color:var(--violet);margin-top:6px">${Number(p.prix).toLocaleString('fr-FR')} ${p.devise||'FCFA'}</p>
+  </div>`;
 }
 
-function filtrerProduits() { afficherProduits(); }
-function filtreCategorie(cat, btn) {
-  filtreActif = cat;
-  document.querySelectorAll('#s-accueil .chip, #s-apps .chip').forEach(c => c.classList.remove('on'));
+function filtrerProduits(){ afficherProduits(); }
+function filtreCategorie(cat,btn){
+  filtreActif=cat;
+  document.querySelectorAll('#s-accueil .chip, #s-apps .chip').forEach(c=>c.classList.remove('on'));
   btn.classList.add('on');
   afficherProduits();
 }
 
-async function ouvrirProduit(id) {
-  produitCourant = allProduits.find(p => p.id === id);
-  if (!produitCourant) return;
+async function ouvrirProduit(id){
+  produitCourant = allProduits.find(p=>p.id===id);
+  if(!produitCourant) return;
   const p = produitCourant;
-
-  const { data: mp } = await sb.from('moyens_paiement').select('*').eq('produit_id', id);
-  p.moyens = mp || [];
-
-  const grad = p.type === 'app_web' ? 'linear-gradient(135deg,#8b5cf6,#6d28d9)'
-    : p.type === 'livre_audio' ? 'linear-gradient(135deg,#3b82f6,#1e40af)'
-    : 'linear-gradient(135deg,#ec4899,#831843)';
-  const logo = p.logo_url
-    ? '<img src="'+p.logo_url+'" style="width:88px;height:88px;object-fit:cover;border-radius:22px;flex-shrink:0" />'
-    : '<div class="tile" style="width:88px;flex-shrink:0;background:'+grad+'"><i data-lucide="layout-grid" style="width:40px;height:40px"></i></div>';
+  const {data:mp} = await sb.from('moyens_paiement').select('*').eq('produit_id',id);
+  p.moyens = mp||[];
+  const {data:avis} = await sb.from('avis').select('*, profiles(nom_complet)').eq('produit_id',id).order('created_at',{ascending:false});
+  p.avis = avis||[];
+  let peutNoter = false;
+  if(currentRole==='client'){
+    const {data:acc} = await sb.from('acces').select('id').eq('client_id',currentUser.id).eq('produit_id',id).maybeSingle();
+    const {data:myAvis} = await sb.from('avis').select('id').eq('client_id',currentUser.id).eq('produit_id',id).maybeSingle();
+    peutNoter = !!acc && !myAvis;
+  }
+  const grad = p.type==='app_web'?'linear-gradient(135deg,#8b5cf6,#6d28d9)':p.type==='livre_audio'?'linear-gradient(135deg,#3b82f6,#1e40af)':'linear-gradient(135deg,#ec4899,#831843)';
+  const logo = p.logo_url?'<img src="'+p.logo_url+'" style="width:88px;height:88px;object-fit:cover;border-radius:22px;flex-shrink:0" />':'<div class="tile" style="width:88px;flex-shrink:0;background:'+grad+'"><i data-lucide="layout-grid" style="width:40px;height:40px"></i></div>';
+  const noteMoy = p.avis.length ? (p.avis.reduce((s,a)=>s+a.note,0)/p.avis.length).toFixed(1) : '—';
+  let formAvis = '';
+  if(peutNoter){
+    formAvis = `
+      <div class="card" style="padding:16px;margin-top:20px">
+        <p style="font-size:14px;font-weight:800;margin-bottom:10px">⭐ Laisser un avis</p>
+        <div class="stars" id="stars-input" style="margin-bottom:10px">
+          ${[1,2,3,4,5].map(n=>`<svg class="star" data-n="${n}" onclick="setNote(${n})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`).join('')}
+        </div>
+        <textarea id="avis-commentaire" placeholder="Ton commentaire (optionnel)" style="width:100%;padding:12px;font-size:13px;background:#0a0a0f;border:1.5px solid var(--border);border-radius:12px;color:#fff;font-family:inherit;min-height:70px;resize:none"></textarea>
+        <button class="btn" style="margin-top:10px;padding:12px" onclick="envoyerAvis()">Publier mon avis</button>
+      </div>`;
+  }
+  const avisHtml = p.avis.length
+    ? p.avis.map(a=>`
+      <div class="card" style="padding:12px;margin-top:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">${(a.profiles?.nom_complet||'U')[0].toUpperCase()}</div>
+          <p style="font-size:12px;font-weight:700;flex:1">${a.profiles?.nom_complet||'Client'}</p>
+          <p style="font-size:12px;color:#facc15">${'★'.repeat(a.note)}${'☆'.repeat(5-a.note)}</p>
+        </div>
+        ${a.commentaire?`<p style="font-size:12px;color:var(--muted);line-height:1.4">${a.commentaire}</p>`:''}
+      </div>`).join('')
+    : '<p style="color:var(--muted);font-size:12px;margin-top:8px">Aucun avis pour l\'instant</p>';
 
   document.getElementById('produit-detail').innerHTML = `
     <button class="back" onclick="go('accueil')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
@@ -620,70 +646,110 @@ async function ouvrirProduit(id) {
       ${logo}
       <div style="flex:1;min-width:0">
         <h2 style="font-size:20px;font-weight:800">${p.titre}</h2>
-        <p style="font-size:12px;color:var(--muted);margin-top:4px">${p.ventes||0} ventes</p>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <span style="font-size:13px;color:#facc15">★</span>
+          <span style="font-size:12px;font-weight:700">${noteMoy}</span>
+          <span style="font-size:11px;color:var(--muted)">(${p.avis.length} avis)</span>
+          <span style="font-size:11px;color:var(--muted)">· ${p.ventes||0} ventes</span>
+        </div>
       </div>
     </div>
     <div style="display:flex;align-items:baseline;gap:6px;margin-top:20px">
       <span style="font-size:30px;font-weight:900;color:var(--violet)">${Number(p.prix).toLocaleString('fr-FR')}</span>
       <span style="font-size:14px;font-weight:700;color:var(--muted)">${p.devise||'FCFA'}</span>
     </div>
-    ${p.audio_url ? `
+    ${p.audio_url?`
       <div class="card" style="padding:14px;margin-top:16px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <i data-lucide="headphones" style="width:14px;height:14px;color:var(--violet)"></i>
           <span style="font-size:12px;font-weight:700">Aperçu audio</span>
         </div>
-        <audio controls style="width:100%" src="${p.audio_url}"></audio>
-      </div>` : ''}
-    ${p.video_url ? `
+        <audio id="audio-preview" controls style="width:100%" src="${p.audio_url}"></audio>
+        <span class="preview-badge">⏱ Aperçu limité à 30 sec</span>
+      </div>`:''}
+    ${p.video_url?`
       <div class="card" style="padding:14px;margin-top:12px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <i data-lucide="video" style="width:14px;height:14px;color:var(--violet)"></i>
-          <span style="font-size:12px;font-weight:700">Aperçu vidéo</span>
+          <span style="font-size:12px;font-weight:700">Bande-annonce</span>
         </div>
-        <video controls style="width:100%;border-radius:12px" src="${p.video_url}"></video>
-      </div>` : ''}
+        <video id="video-preview" controls style="width:100%;border-radius:12px" src="${p.video_url}"></video>
+        <span class="preview-badge">⏱ Aperçu limité à 30 sec</span>
+      </div>`:''}
     <div style="display:flex;gap:10px;margin-top:20px">
       <button class="btn" style="flex:1" onclick="go('checkout')">Acheter</button>
     </div>
     <h3 style="font-size:15px;font-weight:800;margin:24px 0 8px">Description</h3>
-    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:30px">${p.description_longue || p.description_courte || 'Pas de description.'}</p>
+    <p style="font-size:13px;color:var(--muted);line-height:1.6">${p.description_longue || 'Pas de description.'}</p>
+    <h3 style="font-size:15px;font-weight:800;margin:24px 0 8px">Avis clients</h3>
+    ${avisHtml}
+    ${formAvis}
+    <div style="height:40px"></div>
   `;
   _go('produit');
   lucide.createIcons();
+  setTimeout(()=>{
+    const a = document.getElementById('audio-preview');
+    const v = document.getElementById('video-preview');
+    if(a) limiterApercu(a,30);
+    if(v) limiterApercu(v,30);
+  },100);
 }
 
-// ================== CHECKOUT ==================
-// ✅ FIX : séparé en 2 fonctions — buildCheckout() remplit, go('checkout') affiche
-function buildCheckout() {
-  if (!produitCourant) {
-    document.getElementById('checkout-content').innerHTML = `
-      <button class="back" onclick="go('accueil')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
-      <p style="text-align:center;padding:40px 0;color:var(--muted)">Aucun produit sélectionné.</p>
-    `;
+function limiterApercu(media, maxSec){
+  let alerte = false;
+  media.addEventListener('timeupdate', ()=>{
+    if(media.currentTime >= maxSec){
+      media.pause();
+      media.currentTime = 0;
+      if(!alerte){
+        alerte = true;
+        toast('⏱ Aperçu limité à 30 sec. Achète pour tout voir.', true);
+        setTimeout(()=>alerte=false, 4000);
+      }
+    }
+  });
+}
+
+function setNote(n){
+  notesAvis = n;
+  document.querySelectorAll('#stars-input .star').forEach(s=>{
+    s.classList.toggle('on', parseInt(s.dataset.n) <= n);
+  });
+}
+
+async function envoyerAvis(){
+  if(!notesAvis){ toast('Choisis une note',true); return; }
+  const com = document.getElementById('avis-commentaire').value.trim();
+  const {error} = await sb.from('avis').insert({
+    produit_id: produitCourant.id,
+    client_id: currentUser.id,
+    note: notesAvis,
+    commentaire: com || null
+  });
+  if(error){ toast(error.message,true); return; }
+  toast('Merci pour ton avis ✅');
+  notesAvis = 0;
+  ouvrirProduit(produitCourant.id);
+}
+
+// ===== CHECKOUT =====
+function buildCheckout(){
+  if(!produitCourant){
+    document.getElementById('checkout-content').innerHTML = `<button class="back" onclick="go('accueil')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button><p style="text-align:center;padding:40px 0;color:var(--muted)">Aucun produit sélectionné.</p>`;
     return;
   }
-
   const p = produitCourant;
-  const moyens = p.moyens || [];
-
-  if (moyens.length === 0) {
-    document.getElementById('checkout-content').innerHTML = `
-      <button class="back" onclick="go('produit')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
-      <p style="text-align:center;padding:40px 0;color:var(--muted)">Le vendeur n'a pas encore configuré de moyen de paiement.</p>
-    `;
+  const moyens = p.moyens||[];
+  if(moyens.length===0){
+    document.getElementById('checkout-content').innerHTML = `<button class="back" onclick="go('produit')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button><p style="text-align:center;padding:40px 0;color:var(--muted)">Le vendeur n'a pas configuré de moyen de paiement.</p>`;
     return;
   }
-
   currentPay = moyens[0].operateur;
-
-  const choixHtml = moyens.length > 1
-    ? `<div id="pay-choice" style="display:flex;gap:8px;margin-bottom:12px">
-        ${moyens.map((m,i)=>`<button class="chip ${i===0?'on':''}" style="flex:1" onclick="selectPay('${m.operateur}', this)">${m.operateur === 'airtel' ? 'Airtel Money' : 'Moov Money'}</button>`).join('')}
-      </div>`
+  const choix = moyens.length>1
+    ? `<div id="pay-choice" style="display:flex;gap:8px;margin-bottom:12px">${moyens.map((m,i)=>`<button class="chip ${i===0?'on':''}" style="flex:1" onclick="selectPay('${m.operateur}',this)">${m.operateur==='airtel'?'Airtel Money':'Moov Money'}</button>`).join('')}</div>`
     : '';
-
-  const first = moyens[0];
+  const f = moyens[0];
   document.getElementById('checkout-content').innerHTML = `
     <button class="back" onclick="go('produit')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
     <h2 style="font-size:20px;font-weight:800;margin-top:18px">Paiement mobile money</h2>
@@ -695,17 +761,17 @@ function buildCheckout() {
         <span style="font-size:22px;font-weight:900;color:var(--violet)">${Number(p.prix).toLocaleString('fr-FR')} ${p.devise||'FCFA'}</span>
       </div>
     </div>
-    ${choixHtml}
+    ${choix}
     <div style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);border-radius:16px;padding:16px;margin-top:14px">
       <p style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:10px">📱 Envoyez le montant au numéro :</p>
       <div style="display:flex;align-items:center;justify-content:space-between;background:#0a0a0f;border-radius:12px;padding:14px">
         <div>
-          <p id="pay-label" style="font-size:11px;color:var(--muted);margin-bottom:4px">${first.operateur === 'airtel' ? 'Airtel Money' : 'Moov Money'}</p>
-          <span id="pay-number" style="font-family:monospace;font-size:15px;font-weight:800">${first.numero}</span>
+          <p id="pay-label" style="font-size:11px;color:var(--muted);margin-bottom:4px">${f.operateur==='airtel'?'Airtel Money':'Moov Money'}</p>
+          <span id="pay-number" style="font-family:monospace;font-size:15px;font-weight:800">${f.numero}</span>
         </div>
         <button style="color:var(--violet);font-size:11px;font-weight:700;background:none;border:none" onclick="copyPay()">Copier</button>
       </div>
-      <p id="pay-benef" style="font-size:11px;color:var(--muted);margin-top:8px">Bénéficiaire : ${first.nom_beneficiaire || 'Le vendeur'}</p>
+      <p id="pay-benef" style="font-size:11px;color:var(--muted);margin-top:8px">Bénéficiaire : ${f.nom_beneficiaire||'Le vendeur'}</p>
     </div>
     <div class="card" style="padding:16px;margin-top:14px">
       <p style="font-size:12px;font-weight:700;margin-bottom:10px">📸 Capture d'écran du dépôt</p>
@@ -717,107 +783,197 @@ function buildCheckout() {
       <img id="preuve-prev" style="display:none;width:100%;border-radius:12px;margin-top:10px" />
     </div>
     <button class="btn" style="margin-top:20px" id="envoyer-btn">Envoyer la preuve</button>
-    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">Le vendeur validera manuellement.</p>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">Le vendeur validera manuellement.<br>Tu recevras une notification dès validation.</p>
   `;
   document.getElementById('envoyer-btn').addEventListener('click', envoyerPreuve);
   lucide.createIcons();
 }
 
-function selectPay(type, btn) {
-  const moyens = produitCourant.moyens || [];
-  const m = moyens.find(x => x.operateur === type);
-  if (!m) return;
+function selectPay(type, btn){
+  const m = (produitCourant.moyens||[]).find(x=>x.operateur===type);
+  if(!m) return;
   document.querySelectorAll('#pay-choice .chip').forEach(c=>c.classList.remove('on'));
   btn.classList.add('on');
-  document.getElementById('pay-label').textContent = type === 'airtel' ? 'Airtel Money' : 'Moov Money';
+  document.getElementById('pay-label').textContent = type==='airtel'?'Airtel Money':'Moov Money';
   document.getElementById('pay-number').textContent = m.numero;
-  const benef = document.getElementById('pay-benef');
-  if (benef) benef.textContent = 'Bénéficiaire : ' + (m.nom_beneficiaire || 'Le vendeur');
+  const b = document.getElementById('pay-benef');
+  if(b) b.textContent = 'Bénéficiaire : ' + (m.nom_beneficiaire||'Le vendeur');
   currentPay = type;
 }
 
-function copyPay() {
-  const num = document.getElementById('pay-number').textContent;
-  navigator.clipboard?.writeText(num);
+function copyPay(){
+  navigator.clipboard?.writeText(document.getElementById('pay-number').textContent);
   toast('Numéro copié ✅');
 }
 
-async function envoyerPreuve() {
+async function envoyerPreuve(){
   const p = produitCourant;
   const file = document.getElementById('preuve-img').files[0];
-  if (!file) { toast('Ajoute une capture d\'écran', true); return; }
-
+  if(!file){ toast('Ajoute une capture',true); return; }
   const btn = document.getElementById('envoyer-btn');
-  btn.disabled = true; btn.textContent = 'Envoi...';
-
-  try {
-    const { data: cmd, error: errCmd } = await sb.from('commandes').insert({
-      client_id: currentUser.id,
-      produit_id: p.id,
-      vendeur_id: p.vendeur_id,
-      montant: p.prix,
-      devise: p.devise || 'FCFA',
-      operateur_paiement: currentPay || (p.moyens[0]?.operateur),
+  btn.disabled=true; btn.textContent='Envoi...';
+  try{
+    const {data:cmd,error:e1} = await sb.from('commandes').insert({
+      client_id: currentUser.id, produit_id: p.id, vendeur_id: p.vendeur_id,
+      montant: p.prix, devise: p.devise||'FCFA',
+      operateur_paiement: currentPay||p.moyens[0]?.operateur,
       statut: 'preuve_envoyee'
     }).select().single();
-    if (errCmd) throw errCmd;
-
+    if(e1) throw e1;
     const ext = file.name.split('.').pop();
-    const path = currentUser.id + '/' + cmd.id + '.' + ext;
-    const { error: errUp } = await sb.storage.from('preuves').upload(path, file);
-    if (errUp) throw errUp;
-
-    await sb.from('preuves_paiement').insert({
-      commande_id: cmd.id,
-      image_url: path
+    const path = currentUser.id+'/'+cmd.id+'.'+ext;
+    const {error:e2} = await sb.storage.from('preuves').upload(path, file);
+    if(e2) throw e2;
+    await sb.from('preuves_paiement').insert({commande_id:cmd.id, image_url:path});
+    await sb.from('notifications').insert({
+      user_id: p.vendeur_id,
+      titre: '🔔 Nouvelle commande',
+      message: 'Tu as reçu une commande pour "'+p.titre+'" ('+Number(p.prix).toLocaleString('fr-FR')+' FCFA)',
+      type: 'commande'
     });
-
     toast('Preuve envoyée ✅ Le vendeur va valider');
     _go('achats');
-  } catch (e) {
+  }catch(e){
     console.error(e);
-    toast('Erreur : ' + (e.message || 'inconnue'), true);
-  } finally {
-    btn.disabled = false; btn.textContent = 'Envoyer la preuve';
+    toast('Erreur : '+(e.message||'inconnue'),true);
+  }finally{
+    btn.disabled=false; btn.textContent='Envoyer la preuve';
   }
 }
 
-// ================== ACHATS ==================
-async function chargerAchats() {
+// ===== ACHATS =====
+async function chargerAchats(){
   const el = document.getElementById('achats-list');
   el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p>';
-  const { data, error } = await sb.from('commandes')
-    .select('*, produits(titre, prix, logo_url, type)')
+  const {data,error} = await sb.from('commandes')
+    .select('*, produits(titre, prix, logo_url, type, lien_app_web)')
     .eq('client_id', currentUser.id)
-    .order('created_at', {ascending:false});
-  if (error || !data || data.length === 0) {
+    .order('created_at',{ascending:false});
+  if(error || !data || data.length===0){
     el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Aucun achat pour l\'instant</p>';
     return;
   }
-  el.innerHTML = data.map(c => `
-    <div class="card" style="padding:14px;margin-bottom:12px">
+  el.innerHTML = data.map(c=>{
+    const ok = c.statut==='validee';
+    const pending = c.statut==='preuve_envoyee';
+    const badge = ok?'<span class="badge green">Actif</span>':pending?'<span class="badge yellow">Attente</span>':c.statut==='refusee'?'<span class="badge red">Refusée</span>':'<span class="badge">'+c.statut+'</span>';
+    let actions = '';
+    if(ok && c.produits?.lien_app_web){
+      actions = `<a href="${c.produits.lien_app_web}" target="_blank" class="btn" style="display:block;text-align:center;margin-top:12px;padding:11px;font-size:13px;text-decoration:none">🔓 Ouvrir l'application</a>`;
+    }
+    if(ok || pending){
+      actions += `<button class="btn ghost" style="margin-top:8px;padding:11px;font-size:13px" onclick="ouvrirChat('${c.id}','${(c.produits?.titre||'').replace(/'/g,"\\'")}','${c.vendeur_id}','vendeur')"><i data-lucide="message-circle" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:4px"></i>Contacter le vendeur</button>`;
+    }
+    return `<div class="card" style="padding:14px;margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:12px">
         <div class="tile" style="width:48px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:14px;aspect-ratio:1"><i data-lucide="package" style="width:22px;height:22px"></i></div>
         <div style="flex:1;min-width:0">
-          <p style="font-size:13px;font-weight:700">${c.produits?.titre || 'Produit'}</p>
+          <p style="font-size:13px;font-weight:700">${c.produits?.titre||'Produit'}</p>
           <p style="font-size:11px;color:var(--muted);margin-top:2px">${Number(c.montant).toLocaleString('fr-FR')} ${c.devise}</p>
         </div>
-        <span class="badge ${c.statut === 'validee' ? 'green' : 'yellow'}">${c.statut === 'validee' ? 'Actif' : c.statut === 'preuve_envoyee' ? 'Attente' : c.statut}</span>
+        ${badge}
       </div>
-    </div>
-  `).join('');
+      ${actions}
+    </div>`;
+  }).join('');
   lucide.createIcons();
 }
 
-// ================== VENDEUR ==================
-async function chargerMesProduits() {
+// ===== NOTIFICATIONS =====
+async function chargerNotifications(){
+  const {data} = await sb.from('notifications').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(50);
+  const nonLues = (data||[]).filter(n=>!n.lu).length;
+  const dot = document.getElementById('notif-dot');
+  if(dot) dot.style.display = nonLues>0 ? 'block' : 'none';
+}
+
+async function chargerNotificationsFull(){
+  const el = document.getElementById('notifications-list');
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p>';
+  const {data} = await sb.from('notifications').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(50);
+  if(!data || data.length===0){
+    el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Aucune notification</p>';
+    return;
+  }
+  el.innerHTML = data.map(n=>`
+    <div class="card" style="padding:14px;margin-bottom:8px;${!n.lu?'border-color:rgba(139,92,246,.4)':''}">
+      <p style="font-size:13px;font-weight:700">${n.titre}</p>
+      ${n.message?`<p style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4">${n.message}</p>`:''}
+      <p style="font-size:10px;color:var(--muted);margin-top:6px">${new Date(n.created_at).toLocaleString('fr-FR')}</p>
+    </div>
+  `).join('');
+  await sb.from('notifications').update({lu:true}).eq('user_id',currentUser.id).eq('lu',false);
+  document.getElementById('notif-dot').style.display='none';
+}
+
+// Override notifications pour charger la liste
+const _goNotif = _go;
+_go = function(name){
+  if(name==='notifications'){ chargerNotificationsFull(); }
+  _goNotif(name);
+};
+
+// ===== CHAT =====
+async function ouvrirChat(commandeId, titre, autreUserId, autreRole){
+  currentCommandeChat = {id: commandeId, autre: autreUserId, autreRole, titre};
+  document.getElementById('chat-titre').textContent = titre;
+  document.getElementById('chat-sous-titre').textContent = autreRole==='vendeur' ? 'Vendeur' : 'Client';
+  _go('chat');
+  await chargerMessages();
+  if(chatChannel) sb.removeChannel(chatChannel);
+  chatChannel = sb.channel('chat-'+commandeId)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'commande_id=eq.'+commandeId},()=>chargerMessages())
+    .subscribe();
+}
+
+async function chargerMessages(){
+  const el = document.getElementById('chat-messages');
+  const c = currentCommandeChat;
+  if(!c) return;
+  const {data} = await sb.from('messages').select('*').eq('commande_id',c.id).order('created_at',{ascending:true});
+  if(!data || data.length===0){
+    el.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:20px 0">Aucun message. Commence la conversation !</p>';
+    return;
+  }
+  el.innerHTML = data.map(m=>{
+    const mine = m.expediteur_id===currentUser.id;
+    return `<div class="chat-bubble ${mine?'me':'them'}">${m.contenu}<br><span style="font-size:9px;opacity:.6">${new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span></div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function envoyerMessage(){
+  const inp = document.getElementById('chat-input');
+  const txt = inp.value.trim();
+  if(!txt || !currentCommandeChat) return;
+  inp.value='';
+  const {error} = await sb.from('messages').insert({
+    commande_id: currentCommandeChat.id,
+    expediteur_id: currentUser.id,
+    destinataire_id: currentCommandeChat.autre,
+    contenu: txt
+  });
+  if(error){ toast(error.message,true); return; }
+  chargerMessages();
+}
+
+function fermerChat(){
+  if(chatChannel){ sb.removeChannel(chatChannel); chatChannel=null; }
+  currentCommandeChat = null;
+  _go('achats');
+}
+
+document.getElementById('chat-input').addEventListener('keypress', (e)=>{ if(e.key==='Enter') envoyerMessage(); });
+
+// ===== VENDEUR =====
+async function chargerMesProduits(){
   const el = document.getElementById('v-produits');
-  const { data } = await sb.from('produits').select('*').eq('vendeur_id', currentUser.id).order('created_at',{ascending:false});
-  if (!data || data.length === 0) {
+  const {data} = await sb.from('produits').select('*').eq('vendeur_id',currentUser.id).order('created_at',{ascending:false});
+  if(!data || data.length===0){
     el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Aucun produit</p>';
     return;
   }
-  el.innerHTML = data.map(p => `
+  el.innerHTML = data.map(p=>`
     <div class="li">
       <div class="tile" style="width:40px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:10px;aspect-ratio:1"><i data-lucide="package" style="width:18px;height:18px"></i></div>
       <div style="flex:1;min-width:0">
@@ -829,157 +985,233 @@ async function chargerMesProduits() {
   lucide.createIcons();
 }
 
-function togglePay(type) {
-  const cb = document.getElementById('pay-' + type);
-  const input = document.getElementById('num-' + type);
-  input.disabled = !cb.checked;
-  if (cb.checked) input.focus();
-  else input.value = '';
+async function chargerCommandesRecues(){
+  const el = document.getElementById('v-commandes');
+  if(!el) return;
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Chargement...</p>';
+  const {data,error} = await sb.from('commandes')
+    .select('*, produits(titre, prix)')
+    .eq('vendeur_id',currentUser.id)
+    .order('created_at',{ascending:false});
+  if(error || !data || data.length===0){
+    el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Aucune commande</p>';
+    return;
+  }
+  const cartes = await Promise.all(data.map(async c=>{
+    let proofUrl=null;
+    if(c.statut==='preuve_envoyee'){
+      const {data:pr} = await sb.from('preuves_paiement').select('*').eq('commande_id',c.id).limit(1);
+      if(pr && pr[0]){
+        const {data:s} = await sb.storage.from('preuves').createSignedUrl(pr[0].image_url,3600);
+        proofUrl = s?.signedUrl;
+      }
+    }
+    return carteCommande(c, proofUrl);
+  }));
+  el.innerHTML = cartes.join('');
+  lucide.createIcons();
 }
 
-document.getElementById('produit-form').addEventListener('submit', async (e) => {
+function carteCommande(c, proofUrl){
+  const badge = c.statut==='validee'?'<span class="badge green">Validée</span>':c.statut==='preuve_envoyee'?'<span class="badge yellow">À valider</span>':c.statut==='refusee'?'<span class="badge red">Refusée</span>':'<span class="badge">'+c.statut+'</span>';
+  let actions = '';
+  if(c.statut==='preuve_envoyee'){
+    actions = `<div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn ghost" style="flex:1;padding:10px;font-size:12px" onclick="refuserCommande('${c.id}')">Refuser</button>
+      <button class="btn" style="flex:1;padding:10px;font-size:12px" onclick="validerCommande('${c.id}')">✓ Valider</button>
+    </div>`;
+  }
+  if(c.statut==='validee' || c.statut==='preuve_envoyee'){
+    actions += `<button class="btn ghost" style="margin-top:8px;padding:10px;font-size:12px" onclick="ouvrirChat('${c.id}','${(c.produits?.titre||'').replace(/'/g,"\\'")}','${c.client_id}','client')"><i data-lucide="message-circle" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:4px"></i>Contacter le client</button>`;
+  }
+  const proofHtml = proofUrl
+    ? `<div style="margin-top:10px"><p style="font-size:11px;color:var(--muted);margin-bottom:6px">Preuve du client :</p><img src="${proofUrl}" style="width:100%;border-radius:10px" /></div>`
+    : '';
+  return `<div class="card" style="padding:14px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="tile" style="width:42px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:12px;aspect-ratio:1"><i data-lucide="package" style="width:18px;height:18px"></i></div>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:12px;font-weight:700">${c.produits?.titre||'Produit'}</p>
+        <p style="font-size:10px;color:var(--muted);margin-top:2px">${Number(c.montant).toLocaleString('fr-FR')} ${c.devise} · ${c.operateur_paiement||''}</p>
+      </div>
+      ${badge}
+    </div>
+    ${proofHtml}
+    ${actions}
+  </div>`;
+}
+
+async function validerCommande(id){
+  if(!confirm('Valider cette commande et donner accès au client ?')) return;
+  const {error} = await sb.from('commandes').update({
+    statut:'validee', valide_par: currentUser.id, valide_le: new Date().toISOString()
+  }).eq('id',id);
+  if(error){ toast('Erreur : '+error.message,true); return; }
+  await sb.from('notifications').insert({
+    user_id: (await sb.from('commandes').select('client_id').eq('id',id).single()).data.client_id,
+    titre: '✅ Commande validée',
+    message: 'Ton achat a été validé. Tu as accès au produit !',
+    type: 'validation'
+  });
+  toast('✅ Validée — client débloqué');
+  chargerCommandesRecues();
+}
+
+async function refuserCommande(id){
+  if(!confirm('Refuser cette commande ?')) return;
+  const {error} = await sb.from('commandes').update({
+    statut:'refusee', valide_par: currentUser.id, valide_le: new Date().toISOString()
+  }).eq('id',id);
+  if(error){ toast('Erreur : '+error.message,true); return; }
+  toast('Commande refusée',true);
+  chargerCommandesRecues();
+}
+
+function togglePay(type){
+  const cb = document.getElementById('pay-'+type);
+  const input = document.getElementById('num-'+type);
+  input.disabled = !cb.checked;
+  if(cb.checked) input.focus(); else input.value='';
+}
+
+document.getElementById('produit-form').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const btn = document.getElementById('p-btn');
-  btn.disabled = true; btn.textContent = 'Publication...';
-
-  try {
-    const type = document.getElementById('p-type').value;
-    const titre = document.getElementById('p-titre').value.trim();
-    const desc = document.getElementById('p-desc').value.trim();
-    const prix = parseFloat(document.getElementById('p-prix').value);
-    const lien = document.getElementById('p-lien').value.trim();
-
-    const airtelOk = document.getElementById('pay-airtel').checked;
-    const moovOk = document.getElementById('pay-moov').checked;
-    const numAirtel = document.getElementById('num-airtel').value.trim();
-    const numMoov = document.getElementById('num-moov').value.trim();
-
-    if (!airtelOk && !moovOk) { toast('Coche au moins un moyen de paiement', true); btn.disabled=false; btn.textContent='Publier le produit'; return; }
-    if (airtelOk && !numAirtel) { toast('Entre ton numéro Airtel', true); btn.disabled=false; btn.textContent='Publier le produit'; return; }
-    if (moovOk && !numMoov) { toast('Entre ton numéro Moov', true); btn.disabled=false; btn.textContent='Publier le produit'; return; }
-
-    const slug = titre.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
-
-    let logo_url = null;
-    const logoFile = document.getElementById('p-logo').files[0];
-    if (logoFile) {
-      const path = currentUser.id + '/' + slug + '.' + logoFile.name.split('.').pop();
-      const { error } = await sb.storage.from('logos').upload(path, logoFile);
-      if (!error) {
-        const { data: pub } = sb.storage.from('logos').getPublicUrl(path);
-        logo_url = pub.publicUrl;
+  btn.disabled=true; btn.textContent='Publication...';
+  try{
+    const type=document.getElementById('p-type').value;
+    const titre=document.getElementById('p-titre').value.trim();
+    const desc=document.getElementById('p-desc').value.trim();
+    const prix=parseFloat(document.getElementById('p-prix').value);
+    const lien=document.getElementById('p-lien').value.trim();
+    const airtelOk=document.getElementById('pay-airtel').checked;
+    const moovOk=document.getElementById('pay-moov').checked;
+    const numAirtel=document.getElementById('num-airtel').value.trim();
+    const numMoov=document.getElementById('num-moov').value.trim();
+    if(!airtelOk && !moovOk){ toast('Coche au moins un moyen de paiement',true); return; }
+    if(airtelOk && !numAirtel){ toast('Entre ton numéro Airtel',true); return; }
+    if(moovOk && !numMoov){ toast('Entre ton numéro Moov',true); return; }
+    const slug = titre.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+Date.now();
+    let logo_url=null;
+    const lf=document.getElementById('p-logo').files[0];
+    if(lf){
+      const p=currentUser.id+'/'+slug+'.'+lf.name.split('.').pop();
+      const {error}=await sb.storage.from('logos').upload(p,lf);
+      if(!error){ const {data:pub}=sb.storage.from('logos').getPublicUrl(p); logo_url=pub.publicUrl; }
+    }
+    let audio_url=null, audio_duree=0;
+    const af=document.getElementById('p-audio').files[0];
+    if(af){
+      const p=currentUser.id+'/'+slug+'-audio.'+af.name.split('.').pop();
+      const {error}=await sb.storage.from('media').upload(p,af);
+      if(!error){
+        const {data:s}=await sb.storage.from('media').createSignedUrl(p,60*60*24*365);
+        audio_url=s?.signedUrl;
+        audio_duree = await getDuration(af,'audio');
       }
     }
-
-    let audio_url = null;
-    const audioFile = document.getElementById('p-audio').files[0];
-    if (audioFile) {
-      const path = currentUser.id + '/' + slug + '-audio.' + audioFile.name.split('.').pop();
-      const { error } = await sb.storage.from('media').upload(path, audioFile);
-      if (!error) {
-        const { data: signed } = await sb.storage.from('media').createSignedUrl(path, 60*60*24*365);
-        audio_url = signed?.signedUrl;
+    let video_url=null, video_duree=0;
+    const vf=document.getElementById('p-video').files[0];
+    if(vf){
+      const p=currentUser.id+'/'+slug+'-video.'+vf.name.split('.').pop();
+      const {error}=await sb.storage.from('media').upload(p,vf);
+      if(!error){
+        const {data:s}=await sb.storage.from('media').createSignedUrl(p,60*60*24*365);
+        video_url=s?.signedUrl;
+        video_duree = await getDuration(vf,'video');
       }
     }
-
-    let video_url = null;
-    const videoFile = document.getElementById('p-video').files[0];
-    if (videoFile) {
-      const path = currentUser.id + '/' + slug + '-video.' + videoFile.name.split('.').pop();
-      const { error } = await sb.storage.from('media').upload(path, videoFile);
-      if (!error) {
-        const { data: signed } = await sb.storage.from('media').createSignedUrl(path, 60*60*24*365);
-        video_url = signed?.signedUrl;
-      }
-    }
-
-    const { data: prod, error: errP } = await sb.from('produits').insert({
-      vendeur_id: currentUser.id,
-      type, slug, titre,
-      description_longue: desc,
-      prix, devise: 'FCFA',
-      lien_app_web: lien || null,
-      logo_url, audio_url, video_url,
-      statut: 'publie',
-      published_at: new Date().toISOString()
+    const {data:prod,error:eP}=await sb.from('produits').insert({
+      vendeur_id: currentUser.id, type, slug, titre,
+      description_longue: desc, prix, devise:'FCFA',
+      lien_app_web: lien||null, logo_url, audio_url, audio_duree, video_url, video_duree,
+      statut:'publie', published_at: new Date().toISOString()
     }).select().single();
-    if (errP) throw errP;
-
-    const moyens = [];
-    if (airtelOk) moyens.push({ produit_id: prod.id, operateur: 'airtel', numero: numAirtel, nom_beneficiaire: currentProfile.nom_complet });
-    if (moovOk) moyens.push({ produit_id: prod.id, operateur: 'moov', numero: numMoov, nom_beneficiaire: currentProfile.nom_complet });
+    if(eP) throw eP;
+    const moyens=[];
+    if(airtelOk) moyens.push({produit_id:prod.id,operateur:'airtel',numero:numAirtel,nom_beneficiaire:currentProfile.nom_complet});
+    if(moovOk) moyens.push({produit_id:prod.id,operateur:'moov',numero:numMoov,nom_beneficiaire:currentProfile.nom_complet});
     await sb.from('moyens_paiement').insert(moyens);
-
     toast('Produit publié ✅');
     document.getElementById('produit-form').reset();
-    document.getElementById('logo-prev').style.display = 'none';
+    document.getElementById('logo-prev').style.display='none';
     await chargerProduits();
     _go('vendre');
-  } catch (e) {
+  }catch(e){
     console.error(e);
-    toast('Erreur : ' + (e.message || 'inconnue'), true);
-  } finally {
-    btn.disabled = false; btn.textContent = 'Publier le produit';
+    toast('Erreur : '+(e.message||'inconnue'),true);
+  }finally{
+    btn.disabled=false; btn.textContent='Publier le produit';
   }
 });
 
-// ================== FICHIERS ==================
-function previewFile(e, id) {
-  const f = e.target.files[0]; if (!f) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    const img = document.getElementById(id);
-    img.src = ev.target.result;
-    img.style.display = 'block';
+function getDuration(file, type){
+  return new Promise(res=>{
+    const url = URL.createObjectURL(file);
+    const el = type==='audio' ? new Audio(url) : document.createElement('video');
+    if(type==='video'){ el.preload='metadata'; el.src=url; }
+    el.addEventListener('loadedmetadata', ()=>res(Math.round(el.duration)));
+    el.addEventListener('error', ()=>res(0));
+  });
+}
+
+// ===== FICHIERS =====
+function previewFile(e,id){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const img=document.getElementById(id);
+    img.src=ev.target.result;
+    img.style.display='block';
   };
   r.readAsDataURL(f);
 }
 
-function checkAudio(e) {
-  const f = e.target.files[0]; if (!f) return;
-  const url = URL.createObjectURL(f);
-  const a = new Audio(url);
-  a.addEventListener('loadedmetadata', () => {
-    const min = a.duration / 60;
-    const info = document.getElementById('audio-info');
-    info.style.display = 'block';
-    if (min > 10) {
-      info.textContent = '❌ Trop long (' + min.toFixed(1) + ' min). Max 10 min.';
-      info.style.color = '#f87171'; e.target.value = '';
+function checkAudio(e){
+  const f=e.target.files[0]; if(!f) return;
+  const url=URL.createObjectURL(f);
+  const a=new Audio(url);
+  a.addEventListener('loadedmetadata',()=>{
+    const min=a.duration/60;
+    const info=document.getElementById('audio-info');
+    info.style.display='block';
+    if(min>30){
+      info.textContent='❌ Trop long ('+min.toFixed(1)+' min). Max 30 min.';
+      info.style.color='#f87171'; e.target.value='';
     } else {
-      info.textContent = '✅ Accepté · ' + min.toFixed(1) + ' min';
-      info.style.color = '#4ade80';
+      info.textContent='✅ Accepté · '+min.toFixed(1)+' min · Aperçu client : 30 sec';
+      info.style.color='#4ade80';
     }
   });
 }
 
-function checkVideo(e) {
-  const f = e.target.files[0]; if (!f) return;
-  const url = URL.createObjectURL(f);
-  const v = document.createElement('video'); v.preload = 'metadata'; v.src = url;
-  v.addEventListener('loadedmetadata', () => {
-    const min = v.duration / 60;
-    const info = document.getElementById('video-info');
-    info.style.display = 'block';
-    if (min > 3) {
-      info.textContent = '❌ Trop longue (' + min.toFixed(1) + ' min). Max 3 min.';
-      info.style.color = '#f87171'; e.target.value = '';
+function checkVideo(e){
+  const f=e.target.files[0]; if(!f) return;
+  const url=URL.createObjectURL(f);
+  const v=document.createElement('video'); v.preload='metadata'; v.src=url;
+  v.addEventListener('loadedmetadata',()=>{
+    const min=v.duration/60;
+    const info=document.getElementById('video-info');
+    info.style.display='block';
+    if(min>90){
+      info.textContent='❌ Trop longue ('+min.toFixed(1)+' min). Max 1h30.';
+      info.style.color='#f87171'; e.target.value='';
     } else {
-      info.textContent = '✅ Acceptée · ' + min.toFixed(1) + ' min';
-      info.style.color = '#4ade80';
+      info.textContent='✅ Acceptée · '+min.toFixed(1)+' min · Bande-annonce : 30 sec';
+      info.style.color='#4ade80';
     }
   });
 }
 
-// ================== TOAST ==================
+// ===== TOAST =====
 let t;
-function toast(msg, err) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.toggle('err', !!err);
+function toast(msg, err){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.toggle('err',!!err);
   el.classList.add('on');
   clearTimeout(t);
-  t = setTimeout(() => el.classList.remove('on'), 3000);
+  t=setTimeout(()=>el.classList.remove('on'),3500);
 }
 </script>
 </body>
