@@ -123,7 +123,6 @@
 
   <div class="content" id="content">
 
-    <!-- ROLE -->
     <section class="scr on" id="s-role">
       <div style="padding:20px 24px 0">
         <div class="logo-mark" style="font-size:36px;text-align:center">OneBuy</div>
@@ -147,7 +146,6 @@
       </div>
     </section>
 
-    <!-- SIGNUP -->
     <section class="scr" id="s-signup">
       <div style="padding:20px 24px 0">
         <button class="back" onclick="go('role')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
@@ -168,7 +166,6 @@
       </div>
     </section>
 
-    <!-- LOGIN -->
     <section class="scr" id="s-login">
       <div style="padding:20px 24px 0">
         <button class="back" onclick="go('role')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
@@ -187,7 +184,6 @@
       </div>
     </section>
 
-    <!-- ACCUEIL -->
     <section class="scr" id="s-accueil">
       <div class="search"><i data-lucide="search"></i><input placeholder="Rechercher une application..." id="search-input" oninput="filtrerProduits()" /></div>
       <div class="chips">
@@ -207,7 +203,6 @@
       <div class="grid2" id="accueil-produits"><p style="color:var(--muted);font-size:13px;padding:0 16px">Chargement...</p></div>
     </section>
 
-    <!-- CATALOGUE -->
     <section class="scr" id="s-apps">
       <div class="chips">
         <button class="chip on" onclick="filtreCategorie('tous', this)">Tout</button>
@@ -218,28 +213,24 @@
       <div class="grid2" style="margin-top:16px" id="apps-produits"><p style="color:var(--muted);font-size:13px;padding:0 16px">Chargement...</p></div>
     </section>
 
-    <!-- PRODUIT -->
     <section class="scr" id="s-produit">
       <div style="padding:0 16px" id="produit-detail">
         <p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p>
       </div>
     </section>
 
-    <!-- CHECKOUT -->
     <section class="scr" id="s-checkout">
       <div style="padding:0 16px" id="checkout-content">
         <p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p>
       </div>
     </section>
 
-    <!-- ACHATS -->
     <section class="scr" id="s-achats">
       <div style="padding:0 16px" id="achats-list">
         <p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Aucun achat pour l'instant</p>
       </div>
     </section>
 
-    <!-- VENDRE -->
     <section class="scr" id="s-vendre">
       <div style="padding:0 16px">
         <div class="card" style="padding:16px;display:flex;align-items:center;gap:12px">
@@ -259,7 +250,6 @@
       </div>
     </section>
 
-    <!-- AJOUTER -->
     <section class="scr" id="s-ajouter">
       <div style="padding:0 16px">
         <button class="back" onclick="go('vendre')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
@@ -331,7 +321,6 @@
       </div>
     </section>
 
-    <!-- COMPTE -->
     <section class="scr" id="s-compte">
       <div style="padding:0 16px">
         <div class="card" style="padding:18px;display:flex;align-items:center;gap:14px">
@@ -388,6 +377,7 @@ let chosenRole = null;
 let allProduits = [];
 let filtreActif = 'tous';
 let produitCourant = null;
+let currentPay = null;
 
 const VENDEUR_ONLY = ['vendre', 'ajouter'];
 const config = {
@@ -404,9 +394,48 @@ const config = {
   compte:{t:'Compte',bar:true,tab:true}
 };
 
-// ================== INIT ==================
 lucide.createIcons();
 
+// ================== NAVIGATION (définie AVANT les appels) ==================
+function _go(name) {
+  if (currentRole === 'client' && VENDEUR_ONLY.includes(name)) {
+    toast('Accès réservé aux vendeurs', true); name = 'accueil';
+  }
+  if (!currentUser && !['role','signup','login'].includes(name)) {
+    name = 'role';
+  }
+  const c = config[name] || {t:'OneBuy',bar:true,tab:true};
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  const target = document.getElementById('s-'+name);
+  if (target) target.classList.add('on');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  const tab = document.querySelector('.tab[data-tab="'+name+'"]');
+  if (tab) tab.classList.add('on');
+  document.getElementById('title').textContent = c.t;
+  document.getElementById('appbar-actions').style.display = c.bar ? 'flex' : 'none';
+  document.getElementById('appbar').style.visibility = c.t ? 'visible' : 'hidden';
+  document.getElementById('tabbar').classList.toggle('hide', !c.tab);
+  document.getElementById('content').scrollTop = 0;
+  lucide.createIcons();
+
+  if (name === 'signup' && chosenRole) {
+    document.getElementById('signup-role-label').textContent = 'Profil : ' + (chosenRole === 'vendeur' ? 'Vendeur' : 'Client');
+  }
+  if (name === 'vendre') chargerMesProduits();
+  if (name === 'achats') chargerAchats();
+}
+
+function go(name) {
+  // ✅ FIX : intercepte checkout pour construire le contenu dynamique AVANT d'afficher
+  if (name === 'checkout') {
+    buildCheckout();
+    _go('checkout');
+    return;
+  }
+  _go(name);
+}
+
+// ================== INIT ==================
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
@@ -414,7 +443,7 @@ async function init() {
     await loadProfile();
     await afterLogin();
   } else {
-    go('role');
+    _go('role');
   }
   setTimeout(() => {
     document.getElementById('splash').classList.add('out');
@@ -443,13 +472,11 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
   btn.disabled = false; btn.textContent = 'Créer mon compte';
 
   if (error) { toast(error.message, true); return; }
-
   if (data.user && !data.session) {
     toast('Vérifie ton email pour confirmer ton compte', true);
-    go('login');
+    _go('login');
     return;
   }
-
   currentUser = data.user;
   await loadProfile();
   toast('Compte créé ✅');
@@ -483,16 +510,16 @@ async function loadProfile() {
 async function afterLogin() {
   applyRole();
   await chargerProduits();
-  go('accueil');
+  _go('accueil');
 }
 
 async function logout() {
   await sb.auth.signOut();
-  currentUser = null; currentProfile = null; currentRole = null; chosenRole = null; allProduits = [];
+  currentUser = null; currentProfile = null; currentRole = null; chosenRole = null; allProduits = []; produitCourant = null;
   document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));
   document.getElementById('role-next').disabled = true;
   applyRole();
-  go('role');
+  _go('role');
 }
 
 // ================== ROLES ==================
@@ -520,35 +547,6 @@ function applyRole() {
     document.getElementById('v-avatar').textContent = initiale;
     document.getElementById('v-nom').textContent = currentProfile.nom_complet;
   }
-}
-
-// ================== NAVIGATION ==================
-function go(name) {
-  if (currentRole === 'client' && VENDEUR_ONLY.includes(name)) {
-    toast('Accès réservé aux vendeurs', true); name = 'accueil';
-  }
-  if (!currentUser && !['role','signup','login'].includes(name)) {
-    name = 'role';
-  }
-  const c = config[name] || {t:'OneBuy',bar:true,tab:true};
-  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
-  const target = document.getElementById('s-'+name);
-  if (target) target.classList.add('on');
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  const tab = document.querySelector('.tab[data-tab="'+name+'"]');
-  if (tab) tab.classList.add('on');
-  document.getElementById('title').textContent = c.t;
-  document.getElementById('appbar-actions').style.display = c.bar ? 'flex' : 'none';
-  document.getElementById('appbar').style.visibility = c.t ? 'visible' : 'hidden';
-  document.getElementById('tabbar').classList.toggle('hide', !c.tab);
-  document.getElementById('content').scrollTop = 0;
-  lucide.createIcons();
-
-  if (name === 'signup' && chosenRole) {
-    document.getElementById('signup-role-label').textContent = 'Profil : ' + (chosenRole === 'vendeur' ? 'Vendeur' : 'Client');
-  }
-  if (name === 'vendre') chargerMesProduits();
-  if (name === 'achats') chargerAchats();
 }
 
 // ================== PRODUITS ==================
@@ -606,7 +604,6 @@ async function ouvrirProduit(id) {
   if (!produitCourant) return;
   const p = produitCourant;
 
-  // Charger les moyens de paiement
   const { data: mp } = await sb.from('moyens_paiement').select('*').eq('produit_id', id);
   p.moyens = mp || [];
 
@@ -652,23 +649,33 @@ async function ouvrirProduit(id) {
     <h3 style="font-size:15px;font-weight:800;margin:24px 0 8px">Description</h3>
     <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:30px">${p.description_longue || p.description_courte || 'Pas de description.'}</p>
   `;
-  go('produit');
+  _go('produit');
   lucide.createIcons();
 }
 
 // ================== CHECKOUT ==================
-function goCheckout() {
-  if (!produitCourant) return;
+// ✅ FIX : séparé en 2 fonctions — buildCheckout() remplit, go('checkout') affiche
+function buildCheckout() {
+  if (!produitCourant) {
+    document.getElementById('checkout-content').innerHTML = `
+      <button class="back" onclick="go('accueil')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
+      <p style="text-align:center;padding:40px 0;color:var(--muted)">Aucun produit sélectionné.</p>
+    `;
+    return;
+  }
+
   const p = produitCourant;
   const moyens = p.moyens || [];
+
   if (moyens.length === 0) {
     document.getElementById('checkout-content').innerHTML = `
       <button class="back" onclick="go('produit')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
       <p style="text-align:center;padding:40px 0;color:var(--muted)">Le vendeur n'a pas encore configuré de moyen de paiement.</p>
     `;
-    go('checkout'); lucide.createIcons();
     return;
   }
+
+  currentPay = moyens[0].operateur;
 
   const choixHtml = moyens.length > 1
     ? `<div id="pay-choice" style="display:flex;gap:8px;margin-bottom:12px">
@@ -698,7 +705,7 @@ function goCheckout() {
         </div>
         <button style="color:var(--violet);font-size:11px;font-weight:700;background:none;border:none" onclick="copyPay()">Copier</button>
       </div>
-      <p style="font-size:11px;color:var(--muted);margin-top:8px">Bénéficiaire : ${first.nom_beneficiaire || 'Le vendeur'}</p>
+      <p id="pay-benef" style="font-size:11px;color:var(--muted);margin-top:8px">Bénéficiaire : ${first.nom_beneficiaire || 'Le vendeur'}</p>
     </div>
     <div class="card" style="padding:16px;margin-top:14px">
       <p style="font-size:12px;font-weight:700;margin-bottom:10px">📸 Capture d'écran du dépôt</p>
@@ -713,11 +720,9 @@ function goCheckout() {
     <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">Le vendeur validera manuellement.</p>
   `;
   document.getElementById('envoyer-btn').addEventListener('click', envoyerPreuve);
-  go('checkout');
   lucide.createIcons();
 }
 
-let currentPay = null;
 function selectPay(type, btn) {
   const moyens = produitCourant.moyens || [];
   const m = moyens.find(x => x.operateur === type);
@@ -726,7 +731,8 @@ function selectPay(type, btn) {
   btn.classList.add('on');
   document.getElementById('pay-label').textContent = type === 'airtel' ? 'Airtel Money' : 'Moov Money';
   document.getElementById('pay-number').textContent = m.numero;
-  document.querySelector('#checkout-content p[style*="Bénéficiaire"]').innerHTML = 'Bénéficiaire : ' + (m.nom_beneficiaire || 'Le vendeur');
+  const benef = document.getElementById('pay-benef');
+  if (benef) benef.textContent = 'Bénéficiaire : ' + (m.nom_beneficiaire || 'Le vendeur');
   currentPay = type;
 }
 
@@ -745,7 +751,6 @@ async function envoyerPreuve() {
   btn.disabled = true; btn.textContent = 'Envoi...';
 
   try {
-    // 1. Créer la commande
     const { data: cmd, error: errCmd } = await sb.from('commandes').insert({
       client_id: currentUser.id,
       produit_id: p.id,
@@ -757,20 +762,18 @@ async function envoyerPreuve() {
     }).select().single();
     if (errCmd) throw errCmd;
 
-    // 2. Upload la preuve
     const ext = file.name.split('.').pop();
     const path = currentUser.id + '/' + cmd.id + '.' + ext;
     const { error: errUp } = await sb.storage.from('preuves').upload(path, file);
     if (errUp) throw errUp;
 
-    // 3. Enregistrer le lien de la preuve
     await sb.from('preuves_paiement').insert({
       commande_id: cmd.id,
       image_url: path
     });
 
     toast('Preuve envoyée ✅ Le vendeur va valider');
-    go('achats');
+    _go('achats');
   } catch (e) {
     console.error(e);
     toast('Erreur : ' + (e.message || 'inconnue'), true);
@@ -778,13 +781,6 @@ async function envoyerPreuve() {
     btn.disabled = false; btn.textContent = 'Envoyer la preuve';
   }
 }
-
-// Override go pour checkout
-const _go = go;
-go = function(name) {
-  if (name === 'checkout') { goCheckout(); return; }
-  _go(name);
-};
 
 // ================== ACHATS ==================
 async function chargerAchats() {
@@ -858,13 +854,12 @@ document.getElementById('produit-form').addEventListener('submit', async (e) => 
     const numAirtel = document.getElementById('num-airtel').value.trim();
     const numMoov = document.getElementById('num-moov').value.trim();
 
-    if (!airtelOk && !moovOk) { toast('Coche au moins un moyen de paiement', true); return; }
-    if (airtelOk && !numAirtel) { toast('Entre ton numéro Airtel', true); return; }
-    if (moovOk && !numMoov) { toast('Entre ton numéro Moov', true); return; }
+    if (!airtelOk && !moovOk) { toast('Coche au moins un moyen de paiement', true); btn.disabled=false; btn.textContent='Publier le produit'; return; }
+    if (airtelOk && !numAirtel) { toast('Entre ton numéro Airtel', true); btn.disabled=false; btn.textContent='Publier le produit'; return; }
+    if (moovOk && !numMoov) { toast('Entre ton numéro Moov', true); btn.disabled=false; btn.textContent='Publier le produit'; return; }
 
     const slug = titre.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
 
-    // 1. Upload logo
     let logo_url = null;
     const logoFile = document.getElementById('p-logo').files[0];
     if (logoFile) {
@@ -876,7 +871,6 @@ document.getElementById('produit-form').addEventListener('submit', async (e) => 
       }
     }
 
-    // 2. Upload audio
     let audio_url = null;
     const audioFile = document.getElementById('p-audio').files[0];
     if (audioFile) {
@@ -888,7 +882,6 @@ document.getElementById('produit-form').addEventListener('submit', async (e) => 
       }
     }
 
-    // 3. Upload vidéo
     let video_url = null;
     const videoFile = document.getElementById('p-video').files[0];
     if (videoFile) {
@@ -900,7 +893,6 @@ document.getElementById('produit-form').addEventListener('submit', async (e) => 
       }
     }
 
-    // 4. Créer le produit
     const { data: prod, error: errP } = await sb.from('produits').insert({
       vendeur_id: currentUser.id,
       type, slug, titre,
@@ -913,7 +905,6 @@ document.getElementById('produit-form').addEventListener('submit', async (e) => 
     }).select().single();
     if (errP) throw errP;
 
-    // 5. Moyens de paiement
     const moyens = [];
     if (airtelOk) moyens.push({ produit_id: prod.id, operateur: 'airtel', numero: numAirtel, nom_beneficiaire: currentProfile.nom_complet });
     if (moovOk) moyens.push({ produit_id: prod.id, operateur: 'moov', numero: numMoov, nom_beneficiaire: currentProfile.nom_complet });
@@ -923,7 +914,7 @@ document.getElementById('produit-form').addEventListener('submit', async (e) => 
     document.getElementById('produit-form').reset();
     document.getElementById('logo-prev').style.display = 'none';
     await chargerProduits();
-    go('vendre');
+    _go('vendre');
   } catch (e) {
     console.error(e);
     toast('Erreur : ' + (e.message || 'inconnue'), true);
