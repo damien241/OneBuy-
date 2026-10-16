@@ -5,8 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
 <meta name="theme-color" content="#0a0a0f" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="OneBuy" />
 <meta name="author" content="Damien (Starly Koumba)" />
+<meta name="description" content="OneBuy — Boutique d'applications web, livres audio et vidéos." />
 <title>OneBuy</title>
+<link rel="manifest" href='data:application/manifest+json,{"name":"OneBuy","short_name":"OneBuy","description":"Boutique d apps web, audio et vidéos","start_url":"./","display":"standalone","orientation":"portrait","background_color":"%230a0a0f","theme_color":"%238b5cf6","lang":"fr","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%2296%22 fill=%22%230a0a0f%22/%3E%3Ctext x=%22256%22 y=%22290%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%22130%22 font-weight=%22900%22 fill=%22%238b5cf6%22%3EOneBuy%3C/text%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]}' />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%2296%22 fill=%22%230a0a0f%22/%3E%3Ctext x=%22256%22 y=%22290%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%22130%22 font-weight=%22900%22 fill=%22%238b5cf6%22%3EOneBuy%3C/text%3E%3C/svg%3E" />
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -20,14 +25,14 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
 .status-bar{height:env(safe-area-inset-top);min-height:env(safe-area-inset-top)}
 .appbar{height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
 .appbar h1{font-size:22px;font-weight:800;letter-spacing:-.5px}
-.icon-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);color:#fff;border:none;transition:transform .15s;position:relative}
+.icon-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);color:#fff;border:none;transition:transform .15s;position:relative;cursor:pointer}
 .icon-btn:active{transform:scale(.92)}
 .notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 8px #ef4444}
 .content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 .content::-webkit-scrollbar{display:none}
 .tabbar{position:absolute;left:0;right:0;bottom:0;height:calc(64px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:rgba(10,10,15,.92);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-top:1px solid var(--border);display:flex;align-items:flex-start;padding-top:8px}
 .tabbar.hide{display:none}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);background:none;border:none;padding:6px 0;font-size:10px;font-weight:600;transition:color .2s;position:relative}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);background:none;border:none;padding:6px 0;font-size:10px;font-weight:600;transition:color .2s;position:relative;cursor:pointer}
 .tab svg{width:22px;height:22px;stroke-width:2}
 .tab.on{color:var(--violet)}
 .tab.on::before{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:20px;height:3px;border-radius:2px;background:var(--violet)}
@@ -39,9 +44,9 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
 .tile{aspect-ratio:1;border-radius:16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .tile svg{width:34px;height:34px;color:#fff;position:relative;z-index:1}
 .tile::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent 60%)}
-.press{transition:transform .12s}
+.press{transition:transform .12s;cursor:pointer}
 .press:active{transform:scale(.96)}
-.btn{width:100%;padding:16px;border:none;border-radius:16px;font-size:15px;font-weight:700;letter-spacing:-.2px;background:var(--violet);color:#fff;transition:transform .12s,background .2s}
+.btn{width:100%;padding:16px;border:none;border-radius:16px;font-size:15px;font-weight:700;letter-spacing:-.2px;background:var(--violet);color:#fff;transition:transform .12s,background .2s;cursor:pointer}
 .btn:active{transform:scale(.97);background:var(--violet-deep)}
 .btn.ghost{background:var(--card-hi);color:#fff}
 .btn:disabled{opacity:.4;pointer-events:none}
@@ -55,7 +60,7 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
 .upload{display:block;padding:22px 16px;text-align:center;background:var(--card);border:1.5px dashed rgba(139,92,246,.25);border-radius:16px;cursor:pointer;transition:border-color .2s}
 .upload:active{border-color:var(--violet)}
 .upload svg{width:22px;height:22px;color:var(--violet);margin:0 auto 8px}
-.chip{padding:8px 14px;border-radius:12px;font-size:13px;font-weight:600;white-space:nowrap;background:var(--card);border:1px solid var(--border);color:#fff;transition:all .15s}
+.chip{padding:8px 14px;border-radius:12px;font-size:13px;font-weight:600;white-space:nowrap;background:var(--card);border:1px solid var(--border);color:#fff;transition:all .15s;cursor:pointer}
 .chip.on{background:var(--violet);border-color:var(--violet)}
 .splash{position:fixed;inset:0;z-index:100;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
 .splash.out{opacity:0;pointer-events:none}
@@ -69,17 +74,18 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
 .toast.err{background:#dc2626}
 .sect{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin:26px 0 12px}
 .sect h2{font-size:17px;font-weight:800;letter-spacing:-.3px}
-.sect button{font-size:12px;color:var(--violet);font-weight:700;background:none;border:none}
+.sect button{font-size:12px;color:var(--violet);font-weight:700;background:none;border:none;cursor:pointer}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
 .hero{margin:0 16px;padding:20px;border-radius:22px;background:linear-gradient(135deg,#7c3aed,#5b21b6 70%,#3b0764);position:relative;overflow:hidden}
 .hero h3{font-size:19px;font-weight:800;line-height:1.2;letter-spacing:-.4px;position:relative}
 .hero p{font-size:12px;color:rgba(255,255,255,.75);margin-top:6px;position:relative}
-.hero button{margin-top:16px;padding:10px 18px;background:#fff;color:#4c1d95;border:none;border-radius:12px;font-size:12px;font-weight:800;position:relative}
-.back{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);border:none;color:#fff}
+.hero button{margin-top:16px;padding:10px 18px;background:#fff;color:#4c1d95;border:none;border-radius:12px;font-size:12px;font-weight:800;position:relative;cursor:pointer}
+.back{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--card);border:none;color:#fff;cursor:pointer}
 .badge{padding:4px 8px;border-radius:8px;font-size:10px;font-weight:700}
 .badge.green{background:rgba(34,197,94,.15);color:#4ade80}
 .badge.yellow{background:rgba(234,179,8,.15);color:#facc15}
 .badge.red{background:rgba(239,68,68,.15);color:#f87171}
+.badge.free{background:rgba(139,92,246,.15);color:#a78bfa}
 .avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800}
 .search{margin:0 16px;position:relative}
 .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}
@@ -105,6 +111,13 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
 .stars{display:flex;gap:2px}
 .star{width:20px;height:20px;cursor:pointer;color:#3a3a4c;transition:color .15s}
 .star.on{color:#facc15;fill:#facc15}
+.install-banner{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:16px;right:16px;background:linear-gradient(135deg,#7c3aed,#5b21b6);border-radius:18px;padding:14px 16px;display:none;align-items:center;gap:12px;z-index:150;box-shadow:0 10px 40px rgba(124,58,237,.4);animation:slideUp .4s cubic-bezier(.22,1,.36,1)}
+.install-banner.on{display:flex}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.install-banner .icon{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px}
+.modal.on{display:flex}
+.modal-inner{background:var(--card);border-radius:20px;padding:20px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto}
 </style>
 </head>
 <body>
@@ -117,7 +130,6 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
 
 <div class="app" id="app" style="display:none">
   <div class="status-bar"></div>
-
   <header class="appbar" id="appbar">
     <h1 id="title">OneBuy</h1>
     <div id="appbar-actions" style="display:none;gap:8px">
@@ -128,7 +140,6 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
       <button class="icon-btn" onclick="go('achats')"><i data-lucide="shopping-bag" style="width:18px;height:18px"></i></button>
     </div>
   </header>
-
   <div class="content" id="content">
 
     <section class="scr on" id="s-role">
@@ -149,7 +160,7 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
         </div>
         <button class="btn" id="role-next" disabled onclick="go('signup')" style="margin-top:24px">Continuer</button>
         <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:20px">
-          Déjà un compte ? <button onclick="go('login')" style="color:var(--violet);background:none;border:none;font-weight:700;font-size:12px">Se connecter</button>
+          Déjà un compte ? <button onclick="go('login')" style="color:var(--violet);background:none;border:none;font-weight:700;font-size:12px;cursor:pointer">Se connecter</button>
         </p>
       </div>
     </section>
@@ -168,7 +179,7 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
           <div class="field"><label>Mot de passe</label><input type="password" id="su-pwd" required placeholder="••••••••" minlength="6" /><p class="hint">6 caractères minimum</p></div>
           <button class="btn" type="submit" id="su-btn" style="margin-top:8px">Créer mon compte</button>
           <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:20px">
-            Déjà un compte ? <button type="button" onclick="go('login')" style="color:var(--violet);background:none;border:none;font-weight:700;font-size:12px">Se connecter</button>
+            Déjà un compte ? <button type="button" onclick="go('login')" style="color:var(--violet);background:none;border:none;font-weight:700;font-size:12px;cursor:pointer">Se connecter</button>
           </p>
         </form>
       </div>
@@ -186,7 +197,7 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
           <div class="field"><label>Mot de passe</label><input type="password" id="li-pwd" required placeholder="••••••••" /></div>
           <button class="btn" type="submit" id="li-btn" style="margin-top:8px">Se connecter</button>
           <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:20px">
-            Pas de compte ? <button type="button" onclick="go('role')" style="color:var(--violet);background:none;border:none;font-weight:700;font-size:12px">S'inscrire</button>
+            Pas de compte ? <button type="button" onclick="go('role')" style="color:var(--violet);background:none;border:none;font-weight:700;font-size:12px;cursor:pointer">S'inscrire</button>
           </p>
         </form>
       </div>
@@ -283,27 +294,34 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
           <div class="field"><label>Type de produit</label><select id="p-type"><option value="app_web">Application web</option><option value="livre_audio">Livre audio</option><option value="video">Vidéo</option></select></div>
           <div class="field"><label>Titre</label><input type="text" id="p-titre" required placeholder="Ex : Asha Manager" /></div>
           <div class="field"><label>Description</label><textarea id="p-desc" required placeholder="Décrivez votre produit..."></textarea></div>
-          <div class="field"><label>Prix (FCFA)</label><input type="number" id="p-prix" required placeholder="5000" /></div>
-          <div class="field"><label style="display:flex;align-items:center;gap:6px"><i data-lucide="link" style="width:12px;height:12px;color:var(--violet)"></i>Lien de l'application web</label><input type="url" id="p-lien" placeholder="https://mon-app.com" /></div>
-
           <div class="field">
-            <label>Moyens de paiement acceptés</label>
-            <div class="card" style="padding:14px;margin-bottom:10px">
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
-                <input type="checkbox" id="pay-airtel" style="width:18px;height:18px;accent-color:#8b5cf6" onchange="togglePay('airtel')" />
-                <span style="flex:1;font-size:14px;font-weight:700">Airtel Money</span>
-              </label>
-              <input type="tel" id="num-airtel" placeholder="+241 07 XX XX XX" disabled style="width:100%;margin-top:12px;padding:12px;font-size:14px;background:#0a0a0f;border:1.5px solid var(--border);border-radius:12px;color:#fff;font-family:inherit" />
-            </div>
-            <div class="card" style="padding:14px">
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
-                <input type="checkbox" id="pay-moov" style="width:18px;height:18px;accent-color:#8b5cf6" onchange="togglePay('moov')" />
-                <span style="flex:1;font-size:14px;font-weight:700">Moov Money</span>
-              </label>
-              <input type="tel" id="num-moov" placeholder="+241 06 XX XX XX" disabled style="width:100%;margin-top:12px;padding:12px;font-size:14px;background:#0a0a0f;border:1.5px solid var(--border);border-radius:12px;color:#fff;font-family:inherit" />
+            <label>Type de contenu</label>
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <button type="button" id="type-payant" class="chip on" style="flex:1;text-align:center" onclick="choisirTypeProduit('payant')">💰 Payant</button>
+              <button type="button" id="type-gratuit" class="chip" style="flex:1;text-align:center" onclick="choisirTypeProduit('gratuit')">🎁 Gratuit</button>
             </div>
           </div>
-
+          <div class="field" id="field-prix"><label>Prix (FCFA)</label><input type="number" id="p-prix" placeholder="5000" /></div>
+          <div class="field"><label style="display:flex;align-items:center;gap:6px"><i data-lucide="link" style="width:12px;height:12px;color:var(--violet)"></i>Lien de l'application web</label><input type="url" id="p-lien" placeholder="https://mon-app.com" /></div>
+          <div id="bloc-paiement">
+            <div class="field">
+              <label>Moyens de paiement acceptés</label>
+              <div class="card" style="padding:14px;margin-bottom:10px">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="pay-airtel" style="width:18px;height:18px;accent-color:#8b5cf6" onchange="togglePay('airtel')" />
+                  <span style="flex:1;font-size:14px;font-weight:700">Airtel Money</span>
+                </label>
+                <input type="tel" id="num-airtel" placeholder="+241 07 XX XX XX" disabled style="width:100%;margin-top:12px;padding:12px;font-size:14px;background:#0a0a0f;border:1.5px solid var(--border);border-radius:12px;color:#fff;font-family:inherit" />
+              </div>
+              <div class="card" style="padding:14px">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="pay-moov" style="width:18px;height:18px;accent-color:#8b5cf6" onchange="togglePay('moov')" />
+                  <span style="flex:1;font-size:14px;font-weight:700">Moov Money</span>
+                </label>
+                <input type="tel" id="num-moov" placeholder="+241 06 XX XX XX" disabled style="width:100%;margin-top:12px;padding:12px;font-size:14px;background:#0a0a0f;border:1.5px solid var(--border);border-radius:12px;color:#fff;font-family:inherit" />
+              </div>
+            </div>
+          </div>
           <div class="field">
             <label>Logo du produit</label>
             <label class="upload">
@@ -313,9 +331,8 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
             </label>
             <img id="logo-prev" style="display:none;width:100px;height:100px;object-fit:cover;border-radius:12px;margin-top:10px" />
           </div>
-
           <div class="field">
-            <label>Aperçu audio (30 min max) — optionnel</label>
+            <label>Aperçu audio (1h15 max) — optionnel</label>
             <label class="upload">
               <input type="file" accept="audio/*" id="p-audio" hidden onchange="checkAudio(event)" />
               <i data-lucide="music"></i>
@@ -324,9 +341,8 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
             </label>
             <p id="audio-info" style="display:none;font-size:11px;margin-top:8px"></p>
           </div>
-
           <div class="field">
-            <label>Aperçu vidéo (1h30 max) — optionnel</label>
+            <label>Aperçu vidéo (4h30 max) — optionnel</label>
             <label class="upload">
               <input type="file" accept="video/*" id="p-video" hidden onchange="checkVideo(event)" />
               <i data-lucide="film"></i>
@@ -335,7 +351,6 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
             </label>
             <p id="video-info" style="display:none;font-size:11px;margin-top:8px"></p>
           </div>
-
           <button class="btn" type="submit" id="p-btn" style="margin-top:20px;margin-bottom:30px">Publier le produit</button>
         </form>
       </div>
@@ -351,17 +366,22 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
           </div>
         </div>
         <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
-          <button class="li" style="width:100%;text-align:left" onclick="go('achats')">
+          <button class="li" style="width:100%;text-align:left;cursor:pointer" onclick="go('achats')">
             <i data-lucide="shopping-bag" style="width:18px;height:18px;color:var(--violet)"></i>
             <span style="flex:1;font-size:13px;font-weight:600">Mes achats</span>
             <i data-lucide="chevron-right" style="width:16px;height:16px;color:var(--muted)"></i>
           </button>
-          <button class="li" id="menu-vendeur" style="width:100%;text-align:left;display:none" onclick="go('vendre')">
+          <button class="li" id="menu-vendeur" style="width:100%;text-align:left;display:none;cursor:pointer" onclick="go('vendre')">
             <i data-lucide="store" style="width:18px;height:18px;color:var(--violet)"></i>
             <span style="flex:1;font-size:13px;font-weight:600">Espace vendeur</span>
             <i data-lucide="chevron-right" style="width:16px;height:16px;color:var(--muted)"></i>
           </button>
-          <button class="li" style="width:100%;text-align:left" onclick="logout()">
+          <button class="li" id="menu-install" style="width:100%;text-align:left;display:none;cursor:pointer" onclick="installerApp()">
+            <i data-lucide="download" style="width:18px;height:18px;color:var(--violet)"></i>
+            <span style="flex:1;font-size:13px;font-weight:600">📲 Installer l'application</span>
+            <i data-lucide="chevron-right" style="width:16px;height:16px;color:var(--muted)"></i>
+          </button>
+          <button class="li" style="width:100%;text-align:left;cursor:pointer" onclick="logout()">
             <i data-lucide="log-out" style="width:18px;height:18px;color:#f87171"></i>
             <span style="flex:1;font-size:13px;font-weight:600;color:#f87171">Se déconnecter</span>
           </button>
@@ -371,7 +391,6 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
     </section>
 
   </div>
-
   <nav class="tabbar hide" id="tabbar">
     <button class="tab on" data-tab="accueil" onclick="go('accueil')"><i data-lucide="home"></i><span>Accueil</span></button>
     <button class="tab" data-tab="apps" onclick="go('apps')"><i data-lucide="compass"></i><span>Explorer</span></button>
@@ -382,18 +401,38 @@ body{background:#0a0a0f;color:#fff;-webkit-font-smoothing:antialiased;overflow:h
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="install-banner" id="install-banner">
+  <div class="icon"><i data-lucide="smartphone" style="width:20px;height:20px;color:#fff"></i></div>
+  <div style="flex:1">
+    <p style="font-size:13px;font-weight:800">Installer OneBuy</p>
+    <p style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px">Ajoute l'app à ton écran d'accueil</p>
+  </div>
+  <button onclick="installerApp()" style="background:#fff;color:#4c1d95;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer">Installer</button>
+  <button onclick="fermerBanniere()" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:18px;cursor:pointer;padding:4px">✕</button>
+</div>
+<div class="modal" id="modal-edit">
+  <div class="modal-inner">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <p style="font-size:16px;font-weight:800">Modifier le produit</p>
+      <button onclick="fermerModalEdit()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div class="field"><label>Titre</label><input id="me-titre" type="text" /></div>
+    <div class="field"><label>Description</label><textarea id="me-desc"></textarea></div>
+    <div class="field"><label>Prix (FCFA)</label><input id="me-prix" type="number" /></div>
+    <div class="field"><label>Lien de l'application</label><input id="me-lien" type="url" /></div>
+    <button class="btn" onclick="sauvegarderModifProduit()" id="me-btn">Enregistrer</button>
+  </div>
+</div>
 
 <script>
-// ===== CONFIG SUPABASE =====
 const SUPABASE_URL = "https://ijannxjdcrzaiexnzhqk.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqYW5ueGpkY3J6YWlleG56aHFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5OTAzOTcsImV4cCI6MjEwNzU2NjM5N30.xziX17R1bbEFFYPMoKYRUvt0uZDU9LMlANoRMcjoo60";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ===== STATE =====
 let currentUser=null, currentProfile=null, currentRole=null, chosenRole=null;
 let allProduits=[], filtreActif='tous', produitCourant=null, currentPay=null;
-let currentCommandeChat=null, chatChannel=null, realtimeChannel=null, notifChannel=null;
-let notesAvis=0;
+let currentCommandeChat=null, chatChannel=null, realtimeChannel=null;
+let notesAvis=0, typeProduit='payant', produitEdite=null, deferredInstallPrompt=null;
 
 const VENDEUR_ONLY=['vendre','ajouter'];
 const config = {
@@ -404,10 +443,53 @@ const config = {
   chat:{t:'',bar:false,tab:false}, vendre:{t:'Vendre',bar:true,tab:true},
   ajouter:{t:'',bar:false,tab:true}, compte:{t:'Compte',bar:true,tab:true}
 };
-
 lucide.createIcons();
 
-// ===== NAVIGATION =====
+if ('serviceWorker' in navigator) {
+  const swCode = "self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.matchAll({type:'window'}).then(l=>{for(const c of l)if('focus' in c)return c.focus();if(clients.openWindow)return clients.openWindow('./');}));});";
+  const blob = new Blob([swCode], {type: 'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const menu = document.getElementById('menu-install');
+  if(menu) menu.style.display = 'flex';
+  if(!localStorage.getItem('onebuy_banner_closed')){
+    document.getElementById('install-banner').classList.add('on');
+  }
+});
+
+async function installerApp(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    const {outcome} = await deferredInstallPrompt.userChoice;
+    if(outcome === 'accepted') toast('OneBuy installé ✅');
+    deferredInstallPrompt = null;
+    document.getElementById('install-banner').classList.remove('on');
+  } else {
+    toast("Utilise le menu du navigateur → Ajouter à l'écran d'accueil", true);
+  }
+}
+
+function fermerBanniere(){
+  document.getElementById('install-banner').classList.remove('on');
+  localStorage.setItem('onebuy_banner_closed', '1');
+}
+
+async function demanderPermissionNotif(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'default') await Notification.requestPermission();
+}
+
+function notifSysteme(titre, message){
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'granted'){
+    new Notification(titre, {body: message, icon: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%2296%22 fill=%22%230a0a0f%22/%3E%3Ctext x=%22256%22 y=%22290%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%22130%22 font-weight=%22900%22 fill=%22%238b5cf6%22%3EOneBuy%3C/text%3E%3C/svg%3E'});
+  }
+}
+
 function _go(name){
   if(currentRole==='client' && VENDEUR_ONLY.includes(name)){ toast('Accès réservé aux vendeurs',true); name='accueil'; }
   if(!currentUser && !['role','signup','login'].includes(name)) name='role';
@@ -424,11 +506,10 @@ function _go(name){
   document.getElementById('tabbar').classList.toggle('hide', !c.tab);
   document.getElementById('content').scrollTop = 0;
   lucide.createIcons();
-
   if(name==='signup' && chosenRole) document.getElementById('signup-role-label').textContent = 'Profil : ' + (chosenRole==='vendeur'?'Vendeur':'Client');
   if(name==='vendre'){ chargerMesProduits(); chargerCommandesRecues(); }
   if(name==='achats') chargerAchats();
-  if(name==='notifications') chargerNotifications();
+  if(name==='notifications') chargerNotificationsFull();
 }
 
 function go(name){
@@ -436,7 +517,6 @@ function go(name){
   _go(name);
 }
 
-// ===== INIT =====
 async function init(){
   const {data:{session}} = await sb.auth.getSession();
   if(session){ currentUser=session.user; await loadProfile(); await afterLogin(); }
@@ -449,7 +529,6 @@ async function init(){
 }
 init();
 
-// ===== AUTH =====
 document.getElementById('signup-form').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const btn = document.getElementById('su-btn');
@@ -462,7 +541,7 @@ document.getElementById('signup-form').addEventListener('submit', async (e)=>{
   const {data,error} = await sb.auth.signUp({email,password:pwd,options:{data:{nom_complet:nom,telephone:tel,ville,role:chosenRole||'client'}}});
   btn.disabled=false; btn.textContent='Créer mon compte';
   if(error){ toast(error.message,true); return; }
-  if(data.user && !data.session){ toast('Vérifie ton email',true); _go('login'); return; }
+  if(data.user && !data.session){ toast('Vérifie ton email pour confirmer',true); _go('login'); return; }
   currentUser=data.user;
   await loadProfile();
   toast('Compte créé ✅');
@@ -495,12 +574,12 @@ async function afterLogin(){
   await chargerProduits();
   await chargerNotifications();
   subscribeRealtime();
+  demanderPermissionNotif();
   _go('accueil');
 }
 
 async function logout(){
   if(realtimeChannel) sb.removeChannel(realtimeChannel);
-  if(notifChannel) sb.removeChannel(notifChannel);
   if(chatChannel) sb.removeChannel(chatChannel);
   await sb.auth.signOut();
   currentUser=null; currentProfile=null; currentRole=null; chosenRole=null; allProduits=[];
@@ -510,7 +589,6 @@ async function logout(){
   _go('role');
 }
 
-// ===== ROLES =====
 function pickRole(role){
   chosenRole=role;
   document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));
@@ -536,29 +614,43 @@ function applyRole(){
   }
 }
 
-// ===== REALTIME =====
 function subscribeRealtime(){
   if(realtimeChannel) sb.removeChannel(realtimeChannel);
   realtimeChannel = sb.channel('rt-onebuy')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'commandes',filter:'vendeur_id=eq.'+currentUser.id},(payload)=>{
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'commandes',filter:'vendeur_id=eq.'+currentUser.id},()=>{
       toast('🔔 Nouvelle commande reçue !');
+      notifSysteme('🔔 Nouvelle commande', 'Un client vient de payer. À valider !');
       if(document.getElementById('s-vendre').classList.contains('on')) chargerCommandesRecues();
       chargerNotifications();
     })
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'commandes',filter:'client_id=eq.'+currentUser.id},(payload)=>{
       if(payload.new.statut==='validee'){
-        toast('✅ Ta commande est validée ! Accès débloqué');
+        toast('✅ Ta commande est validée !');
+        notifSysteme('✅ Commande validée', 'Ton achat est débloqué !');
         if(document.getElementById('s-achats').classList.contains('on')) chargerAchats();
         chargerNotifications();
       } else if(payload.new.statut==='refusee'){
         toast('❌ Ta commande a été refusée',true);
+        notifSysteme('❌ Commande refusée', 'Le vendeur a refusé ta commande.');
         chargerAchats();
+      }
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'user_id=eq.'+currentUser.id},(payload)=>{
+      const n = payload.new;
+      notifSysteme(n.titre, n.message || '');
+      chargerNotifications();
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'destinataire_id=eq.'+currentUser.id},(payload)=>{
+      const m = payload.new;
+      if(currentCommandeChat && (m.commande_id === currentCommandeChat.id || m.produit_id === currentCommandeChat.produitId)){
+        chargerMessages();
+      } else {
+        toast('💬 Nouveau message');
       }
     })
     .subscribe();
 }
 
-// ===== PRODUITS =====
 async function chargerProduits(){
   const {data,error} = await sb.from('produits').select('*').eq('statut','publie').order('created_at',{ascending:false});
   if(error){ console.error(error); return; }
@@ -583,12 +675,8 @@ function carteProduit(p){
   const grad = p.type==='app_web'?'linear-gradient(135deg,#8b5cf6,#6d28d9)':p.type==='livre_audio'?'linear-gradient(135deg,#3b82f6,#1e40af)':'linear-gradient(135deg,#ec4899,#831843)';
   const ic = p.type==='app_web'?'layout-grid':p.type==='livre_audio'?'headphones':'video';
   const logo = p.logo_url?'<img src="'+p.logo_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:16px;position:absolute;inset:0" />':'<i data-lucide="'+ic+'"></i>';
-  return `<div class="press" onclick="ouvrirProduit('${p.id}')">
-    <div class="tile" style="background:${grad};position:relative">${logo}</div>
-    <p style="font-weight:700;font-size:13px;margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titre}</p>
-    <p style="font-size:11px;color:var(--muted);margin-top:2px">${p.ventes||0} ventes</p>
-    <p style="font-size:13px;font-weight:800;color:var(--violet);margin-top:6px">${Number(p.prix).toLocaleString('fr-FR')} ${p.devise||'FCFA'}</p>
-  </div>`;
+  const prix = p.prix==0 ? '<span style="color:#4ade80">🎁 Gratuit</span>' : Number(p.prix).toLocaleString('fr-FR')+' '+(p.devise||'FCFA');
+  return '<div class="press" onclick="ouvrirProduit(\''+p.id+'\')"><div class="tile" style="background:'+grad+';position:relative">'+logo+'</div><p style="font-weight:700;font-size:13px;margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.titre+'</p><p style="font-size:11px;color:var(--muted);margin-top:2px">'+(p.ventes||0)+' ventes</p><p style="font-size:13px;font-weight:800;color:var(--violet);margin-top:6px">'+prix+'</p></div>';
 }
 
 function filtrerProduits(){ afficherProduits(); }
@@ -607,108 +695,125 @@ async function ouvrirProduit(id){
   p.moyens = mp||[];
   const {data:avis} = await sb.from('avis').select('*, profiles(nom_complet)').eq('produit_id',id).order('created_at',{ascending:false});
   p.avis = avis||[];
+  let acces = null;
+  if(currentUser){
+    const {data:a} = await sb.from('acces').select('id').eq('client_id',currentUser.id).eq('produit_id',id).maybeSingle();
+    acces = a;
+  }
   let peutNoter = false;
-  if(currentRole==='client'){
-    const {data:acc} = await sb.from('acces').select('id').eq('client_id',currentUser.id).eq('produit_id',id).maybeSingle();
+  if(currentRole==='client' && acces){
     const {data:myAvis} = await sb.from('avis').select('id').eq('client_id',currentUser.id).eq('produit_id',id).maybeSingle();
-    peutNoter = !!acc && !myAvis;
+    peutNoter = !myAvis;
   }
   const grad = p.type==='app_web'?'linear-gradient(135deg,#8b5cf6,#6d28d9)':p.type==='livre_audio'?'linear-gradient(135deg,#3b82f6,#1e40af)':'linear-gradient(135deg,#ec4899,#831843)';
   const logo = p.logo_url?'<img src="'+p.logo_url+'" style="width:88px;height:88px;object-fit:cover;border-radius:22px;flex-shrink:0" />':'<div class="tile" style="width:88px;flex-shrink:0;background:'+grad+'"><i data-lucide="layout-grid" style="width:40px;height:40px"></i></div>';
   const noteMoy = p.avis.length ? (p.avis.reduce((s,a)=>s+a.note,0)/p.avis.length).toFixed(1) : '—';
+  let actionHtml = '';
+  const nomSafe = p.titre.replace(/'/g,"\\'");
+  if(p.prix == 0){
+    if(acces){
+      actionHtml = '<div style="display:flex;gap:10px;margin-top:20px">'+(p.lien_app_web?'<a href="'+p.lien_app_web+'" target="_blank" class="btn" style="flex:1;text-align:center;text-decoration:none">🔓 Ouvrir l\'app</a>':'')+'<button class="btn ghost" style="flex:1" onclick="ouvrirChatProduit(\''+p.id+'\',\''+nomSafe+'\',\''+p.vendeur_id+'\')">💬 Contacter</button></div>';
+    } else {
+      actionHtml = '<div style="display:flex;gap:10px;margin-top:20px"><button class="btn" style="flex:1" onclick="obtenirGratuit(\''+p.id+'\')">🎁 Obtenir gratuitement</button><button class="btn ghost" style="flex:1" onclick="ouvrirChatProduit(\''+p.id+'\',\''+nomSafe+'\',\''+p.vendeur_id+'\')">💬 Contacter</button></div>';
+    }
+  } else {
+    if(acces){
+      actionHtml = '<div style="display:flex;gap:10px;margin-top:20px">'+(p.lien_app_web?'<a href="'+p.lien_app_web+'" target="_blank" class="btn" style="flex:1;text-align:center;text-decoration:none">🔓 Ouvrir l\'app</a>':'')+'<button class="btn ghost" style="flex:1" onclick="ouvrirChatProduit(\''+p.id+'\',\''+nomSafe+'\',\''+p.vendeur_id+'\')">💬 Contacter</button></div>';
+    } else {
+      actionHtml = '<div style="display:flex;gap:10px;margin-top:20px"><button class="btn" style="flex:1" onclick="go(\'checkout\')">💰 Acheter</button><button class="btn ghost" style="flex:1" onclick="ouvrirChatProduit(\''+p.id+'\',\''+nomSafe+'\',\''+p.vendeur_id+'\')">💬 Contacter</button></div>';
+    }
+  }
+  let audioHtml = '';
+  if(p.audio_url){
+    if(acces){
+      audioHtml = '<div class="card" style="padding:14px;margin-top:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><i data-lucide="headphones" style="width:14px;height:14px;color:var(--violet)"></i><span style="font-size:12px;font-weight:700">Audio complet</span></div><audio controls style="width:100%" src="'+p.audio_url+'"></audio></div>';
+    } else {
+      audioHtml = '<div class="card" style="padding:14px;margin-top:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><i data-lucide="headphones" style="width:14px;height:14px;color:var(--violet)"></i><span style="font-size:12px;font-weight:700">Aperçu audio</span></div><audio id="audio-preview" controls style="width:100%" src="'+p.audio_url+'"></audio><span class="preview-badge">⏱ Aperçu limité à 30 sec</span></div>';
+    }
+  }
+  let videoHtml = '';
+  if(p.video_url){
+    if(acces){
+      videoHtml = '<div class="card" style="padding:14px;margin-top:12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><i data-lucide="video" style="width:14px;height:14px;color:var(--violet)"></i><span style="font-size:12px;font-weight:700">Vidéo complète</span></div><video id="video-full" controls controlsList="nodownload" style="width:100%;border-radius:12px" src="'+p.video_url+'"></video><button class="btn ghost" style="margin-top:10px;padding:11px;font-size:13px" onclick="telechargerVideo(\''+p.video_url+'\',\''+nomSafe+'\')">⬇️ Télécharger la vidéo</button></div>';
+    } else {
+      videoHtml = '<div class="card" style="padding:14px;margin-top:12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><i data-lucide="video" style="width:14px;height:14px;color:var(--violet)"></i><span style="font-size:12px;font-weight:700">Bande-annonce</span></div><video id="video-preview" controls controlsList="nodownload" style="width:100%;border-radius:12px" src="'+p.video_url+'"></video><span class="preview-badge">⏱ Aperçu limité à 30 sec</span><div id="video-actions" style="display:none;margin-top:12px"><p style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:8px">Aperçu terminé</p><button class="btn" style="padding:12px;font-size:13px" onclick="regarderSuite(\''+p.id+'\','+p.prix+')">▶️ Regarder maintenant</button></div></div>';
+    }
+  }
   let formAvis = '';
   if(peutNoter){
-    formAvis = `
-      <div class="card" style="padding:16px;margin-top:20px">
-        <p style="font-size:14px;font-weight:800;margin-bottom:10px">⭐ Laisser un avis</p>
-        <div class="stars" id="stars-input" style="margin-bottom:10px">
-          ${[1,2,3,4,5].map(n=>`<svg class="star" data-n="${n}" onclick="setNote(${n})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`).join('')}
-        </div>
-        <textarea id="avis-commentaire" placeholder="Ton commentaire (optionnel)" style="width:100%;padding:12px;font-size:13px;background:#0a0a0f;border:1.5px solid var(--border);border-radius:12px;color:#fff;font-family:inherit;min-height:70px;resize:none"></textarea>
-        <button class="btn" style="margin-top:10px;padding:12px" onclick="envoyerAvis()">Publier mon avis</button>
-      </div>`;
+    formAvis = '<div class="card" style="padding:16px;margin-top:20px"><p style="font-size:14px;font-weight:800;margin-bottom:10px">⭐ Laisser un avis</p><div class="stars" id="stars-input" style="margin-bottom:10px">'+[1,2,3,4,5].map(n=>'<svg class="star" data-n="'+n+'" onclick="setNote('+n+')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>').join('')+'</div><textarea id="avis-commentaire" placeholder="Ton commentaire (optionnel)" style="width:100%;padding:12px;font-size:13px;background:#0a0a0f;border:1.5px solid var(--border);border-radius:12px;color:#fff;font-family:inherit;min-height:70px;resize:none"></textarea><button class="btn" style="margin-top:10px;padding:12px" onclick="envoyerAvis()">Publier mon avis</button></div>';
   }
   const avisHtml = p.avis.length
-    ? p.avis.map(a=>`
-      <div class="card" style="padding:12px;margin-top:8px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">${(a.profiles?.nom_complet||'U')[0].toUpperCase()}</div>
-          <p style="font-size:12px;font-weight:700;flex:1">${a.profiles?.nom_complet||'Client'}</p>
-          <p style="font-size:12px;color:#facc15">${'★'.repeat(a.note)}${'☆'.repeat(5-a.note)}</p>
-        </div>
-        ${a.commentaire?`<p style="font-size:12px;color:var(--muted);line-height:1.4">${a.commentaire}</p>`:''}
-      </div>`).join('')
+    ? p.avis.map(a=>'<div class="card" style="padding:12px;margin-top:8px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">'+((a.profiles?.nom_complet||'U')[0].toUpperCase())+'</div><p style="font-size:12px;font-weight:700;flex:1">'+(a.profiles?.nom_complet||'Client')+'</p><p style="font-size:12px;color:#facc15">'+'★'.repeat(a.note)+'☆'.repeat(5-a.note)+'</p></div>'+(a.commentaire?'<p style="font-size:12px;color:var(--muted);line-height:1.4">'+a.commentaire+'</p>':'')+'</div>').join('')
     : '<p style="color:var(--muted);font-size:12px;margin-top:8px">Aucun avis pour l\'instant</p>';
-
-  document.getElementById('produit-detail').innerHTML = `
-    <button class="back" onclick="go('accueil')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
-    <div style="display:flex;gap:16px;margin-top:18px;align-items:center">
-      ${logo}
-      <div style="flex:1;min-width:0">
-        <h2 style="font-size:20px;font-weight:800">${p.titre}</h2>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-          <span style="font-size:13px;color:#facc15">★</span>
-          <span style="font-size:12px;font-weight:700">${noteMoy}</span>
-          <span style="font-size:11px;color:var(--muted)">(${p.avis.length} avis)</span>
-          <span style="font-size:11px;color:var(--muted)">· ${p.ventes||0} ventes</span>
-        </div>
-      </div>
-    </div>
-    <div style="display:flex;align-items:baseline;gap:6px;margin-top:20px">
-      <span style="font-size:30px;font-weight:900;color:var(--violet)">${Number(p.prix).toLocaleString('fr-FR')}</span>
-      <span style="font-size:14px;font-weight:700;color:var(--muted)">${p.devise||'FCFA'}</span>
-    </div>
-    ${p.audio_url?`
-      <div class="card" style="padding:14px;margin-top:16px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <i data-lucide="headphones" style="width:14px;height:14px;color:var(--violet)"></i>
-          <span style="font-size:12px;font-weight:700">Aperçu audio</span>
-        </div>
-        <audio id="audio-preview" controls style="width:100%" src="${p.audio_url}"></audio>
-        <span class="preview-badge">⏱ Aperçu limité à 30 sec</span>
-      </div>`:''}
-    ${p.video_url?`
-      <div class="card" style="padding:14px;margin-top:12px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <i data-lucide="video" style="width:14px;height:14px;color:var(--violet)"></i>
-          <span style="font-size:12px;font-weight:700">Bande-annonce</span>
-        </div>
-        <video id="video-preview" controls style="width:100%;border-radius:12px" src="${p.video_url}"></video>
-        <span class="preview-badge">⏱ Aperçu limité à 30 sec</span>
-      </div>`:''}
-    <div style="display:flex;gap:10px;margin-top:20px">
-      <button class="btn" style="flex:1" onclick="go('checkout')">Acheter</button>
-    </div>
-    <h3 style="font-size:15px;font-weight:800;margin:24px 0 8px">Description</h3>
-    <p style="font-size:13px;color:var(--muted);line-height:1.6">${p.description_longue || 'Pas de description.'}</p>
-    <h3 style="font-size:15px;font-weight:800;margin:24px 0 8px">Avis clients</h3>
-    ${avisHtml}
-    ${formAvis}
-    <div style="height:40px"></div>
-  `;
+  const prixAff = p.prix==0 ? '<span style="color:#4ade80">🎁 Gratuit</span>' : '<span style="font-size:30px;font-weight:900;color:var(--violet)">'+Number(p.prix).toLocaleString('fr-FR')+'</span><span style="font-size:14px;font-weight:700;color:var(--muted);margin-left:6px">'+(p.devise||'FCFA')+'</span>';
+  document.getElementById('produit-detail').innerHTML = '<button class="back" onclick="go(\'accueil\')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button><div style="display:flex;gap:16px;margin-top:18px;align-items:center">'+logo+'<div style="flex:1;min-width:0"><h2 style="font-size:20px;font-weight:800">'+p.titre+'</h2><div style="display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap"><span style="font-size:13px;color:#facc15">★</span><span style="font-size:12px;font-weight:700">'+noteMoy+'</span><span style="font-size:11px;color:var(--muted)">('+p.avis.length+' avis)</span><span style="font-size:11px;color:var(--muted)">· '+(p.ventes||0)+' ventes</span>'+(p.prix==0?'<span class="badge free">Gratuit</span>':'')+'</div></div></div><div style="display:flex;align-items:baseline;gap:6px;margin-top:20px">'+prixAff+'</div>'+audioHtml+videoHtml+actionHtml+'<h3 style="font-size:15px;font-weight:800;margin:24px 0 8px">Description</h3><p style="font-size:13px;color:var(--muted);line-height:1.6">'+(p.description_longue||'Pas de description.')+'</p><h3 style="font-size:15px;font-weight:800;margin:24px 0 8px">Avis clients</h3>'+avisHtml+formAvis+'<div style="height:40px"></div>';
   _go('produit');
   lucide.createIcons();
   setTimeout(()=>{
     const a = document.getElementById('audio-preview');
     const v = document.getElementById('video-preview');
-    if(a) limiterApercu(a,30);
-    if(v) limiterApercu(v,30);
+    if(a) limiterApercu(a, 30, null);
+    if(v) limiterApercu(v, 30, ()=>{
+      const acts = document.getElementById('video-actions');
+      if(acts) acts.style.display = 'block';
+    });
   },100);
 }
 
-function limiterApercu(media, maxSec){
-  let alerte = false;
+function limiterApercu(media, maxSec, onEnd){
+  let bloque = false;
   media.addEventListener('timeupdate', ()=>{
-    if(media.currentTime >= maxSec){
+    if(!bloque && media.currentTime >= maxSec){
       media.pause();
       media.currentTime = 0;
-      if(!alerte){
-        alerte = true;
-        toast('⏱ Aperçu limité à 30 sec. Achète pour tout voir.', true);
-        setTimeout(()=>alerte=false, 4000);
-      }
+      bloque = true;
+      toast('⏱ Aperçu limité à 30 sec');
+      if(onEnd) onEnd();
+      setTimeout(()=>bloque=false, 3000);
     }
   });
+}
+
+function regarderSuite(produitId, prix){
+  if(prix == 0){ obtenirGratuit(produitId); }
+  else { toast('Achète le produit pour voir la vidéo complète', true); go('checkout'); }
+}
+
+async function telechargerVideo(url, titre){
+  try{
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = titre.replace(/[^a-z0-9]/gi,'_')+'.mp4';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast('Téléchargement lancé ✅');
+  }catch(e){ toast('Erreur de téléchargement', true); }
+}
+
+async function obtenirGratuit(produitId){
+  const p = allProduits.find(x=>x.id===produitId);
+  if(!p) return;
+  const {data:existant} = await sb.from('acces').select('id').eq('client_id',currentUser.id).eq('produit_id',produitId).maybeSingle();
+  if(existant){ toast('Tu as déjà accès ✅'); go('achats'); return; }
+  try{
+    const {data:cmd,error:e1} = await sb.from('commandes').insert({
+      client_id: currentUser.id, produit_id: p.id, vendeur_id: p.vendeur_id,
+      montant: 0, devise: 'FCFA', operateur_paiement: null,
+      statut: 'validee', valide_le: new Date().toISOString()
+    }).select().single();
+    if(e1) throw e1;
+    await sb.from('notifications').insert({
+      user_id: p.vendeur_id,
+      titre: '🎁 Nouvel accès gratuit',
+      message: 'Un client a obtenu "'+p.titre+'" gratuitement',
+      type: 'commande'
+    });
+    toast('🎁 Accès débloqué !');
+    go('achats');
+  }catch(e){ console.error(e); toast('Erreur : '+(e.message||'inconnue'),true); }
 }
 
 function setNote(n){
@@ -722,10 +827,8 @@ async function envoyerAvis(){
   if(!notesAvis){ toast('Choisis une note',true); return; }
   const com = document.getElementById('avis-commentaire').value.trim();
   const {error} = await sb.from('avis').insert({
-    produit_id: produitCourant.id,
-    client_id: currentUser.id,
-    note: notesAvis,
-    commentaire: com || null
+    produit_id: produitCourant.id, client_id: currentUser.id,
+    note: notesAvis, commentaire: com || null
   });
   if(error){ toast(error.message,true); return; }
   toast('Merci pour ton avis ✅');
@@ -733,58 +836,23 @@ async function envoyerAvis(){
   ouvrirProduit(produitCourant.id);
 }
 
-// ===== CHECKOUT =====
 function buildCheckout(){
   if(!produitCourant){
-    document.getElementById('checkout-content').innerHTML = `<button class="back" onclick="go('accueil')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button><p style="text-align:center;padding:40px 0;color:var(--muted)">Aucun produit sélectionné.</p>`;
+    document.getElementById('checkout-content').innerHTML = '<button class="back" onclick="go(\'accueil\')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button><p style="text-align:center;padding:40px 0;color:var(--muted)">Aucun produit sélectionné.</p>';
     return;
   }
   const p = produitCourant;
   const moyens = p.moyens||[];
   if(moyens.length===0){
-    document.getElementById('checkout-content').innerHTML = `<button class="back" onclick="go('produit')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button><p style="text-align:center;padding:40px 0;color:var(--muted)">Le vendeur n'a pas configuré de moyen de paiement.</p>`;
+    document.getElementById('checkout-content').innerHTML = '<button class="back" onclick="go(\'produit\')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button><p style="text-align:center;padding:40px 0;color:var(--muted)">Le vendeur n\'a pas configuré de moyen de paiement.</p>';
     return;
   }
   currentPay = moyens[0].operateur;
   const choix = moyens.length>1
-    ? `<div id="pay-choice" style="display:flex;gap:8px;margin-bottom:12px">${moyens.map((m,i)=>`<button class="chip ${i===0?'on':''}" style="flex:1" onclick="selectPay('${m.operateur}',this)">${m.operateur==='airtel'?'Airtel Money':'Moov Money'}</button>`).join('')}</div>`
+    ? '<div id="pay-choice" style="display:flex;gap:8px;margin-bottom:12px">'+moyens.map((m,i)=>'<button class="chip '+(i===0?'on':'')+'" style="flex:1" onclick="selectPay(\''+m.operateur+'\',this)">'+(m.operateur==='airtel'?'Airtel Money':'Moov Money')+'</button>').join('')+'</div>'
     : '';
   const f = moyens[0];
-  document.getElementById('checkout-content').innerHTML = `
-    <button class="back" onclick="go('produit')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
-    <h2 style="font-size:20px;font-weight:800;margin-top:18px">Paiement mobile money</h2>
-    <div class="card" style="padding:16px;margin-top:18px">
-      <p style="font-size:11px;color:var(--muted);font-weight:600">PRODUIT</p>
-      <p style="font-size:14px;font-weight:700;margin-top:4px">${p.titre}</p>
-      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px">
-        <span style="font-size:11px;color:var(--muted);font-weight:600">TOTAL</span>
-        <span style="font-size:22px;font-weight:900;color:var(--violet)">${Number(p.prix).toLocaleString('fr-FR')} ${p.devise||'FCFA'}</span>
-      </div>
-    </div>
-    ${choix}
-    <div style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);border-radius:16px;padding:16px;margin-top:14px">
-      <p style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:10px">📱 Envoyez le montant au numéro :</p>
-      <div style="display:flex;align-items:center;justify-content:space-between;background:#0a0a0f;border-radius:12px;padding:14px">
-        <div>
-          <p id="pay-label" style="font-size:11px;color:var(--muted);margin-bottom:4px">${f.operateur==='airtel'?'Airtel Money':'Moov Money'}</p>
-          <span id="pay-number" style="font-family:monospace;font-size:15px;font-weight:800">${f.numero}</span>
-        </div>
-        <button style="color:var(--violet);font-size:11px;font-weight:700;background:none;border:none" onclick="copyPay()">Copier</button>
-      </div>
-      <p id="pay-benef" style="font-size:11px;color:var(--muted);margin-top:8px">Bénéficiaire : ${f.nom_beneficiaire||'Le vendeur'}</p>
-    </div>
-    <div class="card" style="padding:16px;margin-top:14px">
-      <p style="font-size:12px;font-weight:700;margin-bottom:10px">📸 Capture d'écran du dépôt</p>
-      <label class="upload">
-        <input type="file" accept="image/*" id="preuve-img" hidden onchange="previewFile(event,'preuve-prev')" />
-        <i data-lucide="image-plus"></i>
-        <p style="font-size:13px;font-weight:600">Ajouter la capture</p>
-      </label>
-      <img id="preuve-prev" style="display:none;width:100%;border-radius:12px;margin-top:10px" />
-    </div>
-    <button class="btn" style="margin-top:20px" id="envoyer-btn">Envoyer la preuve</button>
-    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">Le vendeur validera manuellement.<br>Tu recevras une notification dès validation.</p>
-  `;
+  document.getElementById('checkout-content').innerHTML = '<button class="back" onclick="go(\'produit\')"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button><h2 style="font-size:20px;font-weight:800;margin-top:18px">Paiement mobile money</h2><div class="card" style="padding:16px;margin-top:18px"><p style="font-size:11px;color:var(--muted);font-weight:600">PRODUIT</p><p style="font-size:14px;font-weight:700;margin-top:4px">'+p.titre+'</p><div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><span style="font-size:11px;color:var(--muted);font-weight:600">TOTAL</span><span style="font-size:22px;font-weight:900;color:var(--violet)">'+Number(p.prix).toLocaleString('fr-FR')+' '+(p.devise||'FCFA')+'</span></div></div>'+choix+'<div style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);border-radius:16px;padding:16px;margin-top:14px"><p style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:10px">📱 Envoyez le montant au numéro :</p><div style="display:flex;align-items:center;justify-content:space-between;background:#0a0a0f;border-radius:12px;padding:14px"><div><p id="pay-label" style="font-size:11px;color:var(--muted);margin-bottom:4px">'+(f.operateur==='airtel'?'Airtel Money':'Moov Money')+'</p><span id="pay-number" style="font-family:monospace;font-size:15px;font-weight:800">'+f.numero+'</span></div><button style="color:var(--violet);font-size:11px;font-weight:700;background:none;border:none;cursor:pointer" onclick="copyPay()">Copier</button></div><p id="pay-benef" style="font-size:11px;color:var(--muted);margin-top:8px">Bénéficiaire : '+(f.nom_beneficiaire||'Le vendeur')+'</p></div><div class="card" style="padding:16px;margin-top:14px"><p style="font-size:12px;font-weight:700;margin-bottom:10px">📸 Capture d\'écran du dépôt</p><label class="upload"><input type="file" accept="image/*" id="preuve-img" hidden onchange="previewFile(event,\'preuve-prev\')" /><i data-lucide="image-plus"></i><p style="font-size:13px;font-weight:600">Ajouter la capture</p></label><img id="preuve-prev" style="display:none;width:100%;border-radius:12px;margin-top:10px" /></div><button class="btn" style="margin-top:20px" id="envoyer-btn">Envoyer la preuve</button><p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">Le vendeur validera manuellement.</p>';
   document.getElementById('envoyer-btn').addEventListener('click', envoyerPreuve);
   lucide.createIcons();
 }
@@ -828,25 +896,20 @@ async function envoyerPreuve(){
     await sb.from('notifications').insert({
       user_id: p.vendeur_id,
       titre: '🔔 Nouvelle commande',
-      message: 'Tu as reçu une commande pour "'+p.titre+'" ('+Number(p.prix).toLocaleString('fr-FR')+' FCFA)',
+      message: 'Commande pour "'+p.titre+'" ('+Number(p.prix).toLocaleString('fr-FR')+' FCFA)',
       type: 'commande'
     });
-    toast('Preuve envoyée ✅ Le vendeur va valider');
+    toast('Preuve envoyée ✅');
     _go('achats');
-  }catch(e){
-    console.error(e);
-    toast('Erreur : '+(e.message||'inconnue'),true);
-  }finally{
-    btn.disabled=false; btn.textContent='Envoyer la preuve';
-  }
+  }catch(e){ console.error(e); toast('Erreur : '+(e.message||'inconnue'),true); }
+  finally{ btn.disabled=false; btn.textContent='Envoyer la preuve'; }
 }
 
-// ===== ACHATS =====
 async function chargerAchats(){
   const el = document.getElementById('achats-list');
   el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Chargement...</p>';
   const {data,error} = await sb.from('commandes')
-    .select('*, produits(titre, prix, logo_url, type, lien_app_web)')
+    .select('*, produits(titre, prix, logo_url, type, lien_app_web, video_url)')
     .eq('client_id', currentUser.id)
     .order('created_at',{ascending:false});
   if(error || !data || data.length===0){
@@ -858,28 +921,24 @@ async function chargerAchats(){
     const pending = c.statut==='preuve_envoyee';
     const badge = ok?'<span class="badge green">Actif</span>':pending?'<span class="badge yellow">Attente</span>':c.statut==='refusee'?'<span class="badge red">Refusée</span>':'<span class="badge">'+c.statut+'</span>';
     let actions = '';
-    if(ok && c.produits?.lien_app_web){
-      actions = `<a href="${c.produits.lien_app_web}" target="_blank" class="btn" style="display:block;text-align:center;margin-top:12px;padding:11px;font-size:13px;text-decoration:none">🔓 Ouvrir l'application</a>`;
+    if(ok){
+      if(c.produits?.lien_app_web) actions += '<a href="'+c.produits.lien_app_web+'" target="_blank" class="btn" style="display:block;text-align:center;margin-top:12px;padding:11px;font-size:13px;text-decoration:none">🔓 Ouvrir l\'application</a>';
+      if(c.produits?.video_url) actions += '<button class="btn ghost" style="margin-top:8px;padding:11px;font-size:13px" onclick="voirVideoAchat(\''+c.produits.video_url+'\',\''+(c.produits.titre||'').replace(/'/g,"\\'")+'\')">🎬 Regarder la vidéo</button>';
     }
     if(ok || pending){
-      actions += `<button class="btn ghost" style="margin-top:8px;padding:11px;font-size:13px" onclick="ouvrirChat('${c.id}','${(c.produits?.titre||'').replace(/'/g,"\\'")}','${c.vendeur_id}','vendeur')"><i data-lucide="message-circle" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:4px"></i>Contacter le vendeur</button>`;
+      actions += '<button class="btn ghost" style="margin-top:8px;padding:11px;font-size:13px" onclick="ouvrirChatCommande(\''+c.id+'\',\''+(c.produits?.titre||'').replace(/'/g,"\\'")+'\',\''+c.vendeur_id+'\',\'vendeur\')"><i data-lucide="message-circle" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:4px"></i>Contacter le vendeur</button>';
     }
-    return `<div class="card" style="padding:14px;margin-bottom:12px">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="tile" style="width:48px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:14px;aspect-ratio:1"><i data-lucide="package" style="width:22px;height:22px"></i></div>
-        <div style="flex:1;min-width:0">
-          <p style="font-size:13px;font-weight:700">${c.produits?.titre||'Produit'}</p>
-          <p style="font-size:11px;color:var(--muted);margin-top:2px">${Number(c.montant).toLocaleString('fr-FR')} ${c.devise}</p>
-        </div>
-        ${badge}
-      </div>
-      ${actions}
-    </div>`;
+    return '<div class="card" style="padding:14px;margin-bottom:12px"><div style="display:flex;align-items:center;gap:12px"><div class="tile" style="width:48px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:14px;aspect-ratio:1">'+(c.produits?.logo_url?'<img src="'+c.produits.logo_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:14px" />':'<i data-lucide="package" style="width:22px;height:22px"></i>')+'</div><div style="flex:1;min-width:0"><p style="font-size:13px;font-weight:700">'+(c.produits?.titre||'Produit')+'</p><p style="font-size:11px;color:var(--muted);margin-top:2px">'+(c.montant==0?'🎁 Gratuit':Number(c.montant).toLocaleString('fr-FR')+' '+c.devise)+'</p></div>'+badge+'</div>'+actions+'</div>';
   }).join('');
   lucide.createIcons();
 }
 
-// ===== NOTIFICATIONS =====
+function voirVideoAchat(url, titre){
+  const html = '<div class="modal on" id="modal-video"><div class="modal-inner"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><p style="font-size:15px;font-weight:800">'+titre+'</p><button onclick="document.getElementById(\'modal-video\').remove()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button></div><video controls controlsList="nodownload" style="width:100%;border-radius:12px" src="'+url+'" autoplay></video><button class="btn ghost" style="margin-top:10px;padding:11px;font-size:13px" onclick="telechargerVideo(\''+url+'\',\''+titre.replace(/'/g,"\\'")+'\')">⬇️ Télécharger</button></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+  lucide.createIcons();
+}
+
 async function chargerNotifications(){
   const {data} = await sb.from('notifications').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(50);
   const nonLues = (data||[]).filter(n=>!n.lu).length;
@@ -895,27 +954,13 @@ async function chargerNotificationsFull(){
     el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0">Aucune notification</p>';
     return;
   }
-  el.innerHTML = data.map(n=>`
-    <div class="card" style="padding:14px;margin-bottom:8px;${!n.lu?'border-color:rgba(139,92,246,.4)':''}">
-      <p style="font-size:13px;font-weight:700">${n.titre}</p>
-      ${n.message?`<p style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4">${n.message}</p>`:''}
-      <p style="font-size:10px;color:var(--muted);margin-top:6px">${new Date(n.created_at).toLocaleString('fr-FR')}</p>
-    </div>
-  `).join('');
+  el.innerHTML = data.map(n=>'<div class="card" style="padding:14px;margin-bottom:8px;'+(!n.lu?'border-color:rgba(139,92,246,.4)':'')+'"><p style="font-size:13px;font-weight:700">'+n.titre+'</p>'+(n.message?'<p style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4">'+n.message+'</p>':'')+'<p style="font-size:10px;color:var(--muted);margin-top:6px">'+new Date(n.created_at).toLocaleString('fr-FR')+'</p></div>').join('');
   await sb.from('notifications').update({lu:true}).eq('user_id',currentUser.id).eq('lu',false);
   document.getElementById('notif-dot').style.display='none';
 }
 
-// Override notifications pour charger la liste
-const _goNotif = _go;
-_go = function(name){
-  if(name==='notifications'){ chargerNotificationsFull(); }
-  _goNotif(name);
-};
-
-// ===== CHAT =====
-async function ouvrirChat(commandeId, titre, autreUserId, autreRole){
-  currentCommandeChat = {id: commandeId, autre: autreUserId, autreRole, titre};
+async function ouvrirChatCommande(commandeId, titre, autreUserId, autreRole){
+  currentCommandeChat = {id: commandeId, autre: autreUserId, autreRole, titre, mode: 'commande'};
   document.getElementById('chat-titre').textContent = titre;
   document.getElementById('chat-sous-titre').textContent = autreRole==='vendeur' ? 'Vendeur' : 'Client';
   _go('chat');
@@ -926,18 +971,37 @@ async function ouvrirChat(commandeId, titre, autreUserId, autreRole){
     .subscribe();
 }
 
+async function ouvrirChatProduit(produitId, titre, vendeurId){
+  if(!currentUser){ toast('Connecte-toi pour contacter le vendeur', true); _go('login'); return; }
+  currentCommandeChat = {id: null, produitId: produitId, autre: vendeurId, autreRole: 'vendeur', titre, mode: 'produit'};
+  document.getElementById('chat-titre').textContent = titre;
+  document.getElementById('chat-sous-titre').textContent = 'Vendeur';
+  _go('chat');
+  await chargerMessages();
+  if(chatChannel) sb.removeChannel(chatChannel);
+  chatChannel = sb.channel('chatp-'+produitId)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'produit_id=eq.'+produitId},()=>chargerMessages())
+    .subscribe();
+}
+
 async function chargerMessages(){
   const el = document.getElementById('chat-messages');
   const c = currentCommandeChat;
   if(!c) return;
-  const {data} = await sb.from('messages').select('*').eq('commande_id',c.id).order('created_at',{ascending:true});
+  let query = sb.from('messages').select('*');
+  if(c.mode === 'commande'){
+    query = query.eq('commande_id', c.id);
+  } else {
+    query = query.eq('produit_id', c.produitId).or('and(expediteur_id.eq.'+currentUser.id+',destinataire_id.eq.'+c.autre+'),and(expediteur_id.eq.'+c.autre+',destinataire_id.eq.'+currentUser.id+')');
+  }
+  const {data} = await query.order('created_at',{ascending:true});
   if(!data || data.length===0){
     el.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:20px 0">Aucun message. Commence la conversation !</p>';
     return;
   }
   el.innerHTML = data.map(m=>{
     const mine = m.expediteur_id===currentUser.id;
-    return `<div class="chat-bubble ${mine?'me':'them'}">${m.contenu}<br><span style="font-size:9px;opacity:.6">${new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span></div>`;
+    return '<div class="chat-bubble '+(mine?'me':'them')+'">'+m.contenu+'<br><span style="font-size:9px;opacity:.6">'+new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+'</span></div>';
   }).join('');
   el.scrollTop = el.scrollHeight;
 }
@@ -947,12 +1011,10 @@ async function envoyerMessage(){
   const txt = inp.value.trim();
   if(!txt || !currentCommandeChat) return;
   inp.value='';
-  const {error} = await sb.from('messages').insert({
-    commande_id: currentCommandeChat.id,
-    expediteur_id: currentUser.id,
-    destinataire_id: currentCommandeChat.autre,
-    contenu: txt
-  });
+  const msg = {expediteur_id: currentUser.id, destinataire_id: currentCommandeChat.autre, contenu: txt};
+  if(currentCommandeChat.mode === 'commande'){ msg.commande_id = currentCommandeChat.id; }
+  else { msg.produit_id = currentCommandeChat.produitId; }
+  const {error} = await sb.from('messages').insert(msg);
   if(error){ toast(error.message,true); return; }
   chargerMessages();
 }
@@ -960,12 +1022,11 @@ async function envoyerMessage(){
 function fermerChat(){
   if(chatChannel){ sb.removeChannel(chatChannel); chatChannel=null; }
   currentCommandeChat = null;
-  _go('achats');
+  _go('produit');
 }
 
 document.getElementById('chat-input').addEventListener('keypress', (e)=>{ if(e.key==='Enter') envoyerMessage(); });
 
-// ===== VENDEUR =====
 async function chargerMesProduits(){
   const el = document.getElementById('v-produits');
   const {data} = await sb.from('produits').select('*').eq('vendeur_id',currentUser.id).order('created_at',{ascending:false});
@@ -973,16 +1034,54 @@ async function chargerMesProduits(){
     el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Aucun produit</p>';
     return;
   }
-  el.innerHTML = data.map(p=>`
-    <div class="li">
-      <div class="tile" style="width:40px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:10px;aspect-ratio:1"><i data-lucide="package" style="width:18px;height:18px"></i></div>
-      <div style="flex:1;min-width:0">
-        <p style="font-size:12px;font-weight:700">${p.titre}</p>
-        <p style="font-size:10px;color:var(--muted);margin-top:2px">${Number(p.prix).toLocaleString('fr-FR')} FCFA · ${p.statut}</p>
-      </div>
-    </div>
-  `).join('');
+  window._mesProduits = data;
+  el.innerHTML = data.map(p=>'<div class="li"><div class="tile" style="width:40px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:10px;aspect-ratio:1">'+(p.logo_url?'<img src="'+p.logo_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px" />':'<i data-lucide="package" style="width:18px;height:18px"></i>')+'</div><div style="flex:1;min-width:0"><p style="font-size:12px;font-weight:700">'+p.titre+'</p><p style="font-size:10px;color:var(--muted);margin-top:2px">'+(p.prix==0?'Gratuit':Number(p.prix).toLocaleString('fr-FR')+' FCFA')+' · '+p.statut+'</p></div><button onclick="modifierProduit(\''+p.id+'\')" style="width:32px;height:32px;border-radius:8px;background:rgba(139,92,246,.15);border:none;color:#a78bfa;display:flex;align-items:center;justify-content:center;cursor:pointer"><i data-lucide="pencil" style="width:14px;height:14px"></i></button><button onclick="supprimerProduit(\''+p.id+'\')" style="width:32px;height:32px;border-radius:8px;background:rgba(239,68,68,.15);border:none;color:#f87171;display:flex;align-items:center;justify-content:center;cursor:pointer"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></div>').join('');
   lucide.createIcons();
+}
+
+function modifierProduit(id){
+  const p = (window._mesProduits||[]).find(x=>x.id===id);
+  if(!p) return;
+  produitEdite = p;
+  document.getElementById('me-titre').value = p.titre;
+  document.getElementById('me-desc').value = p.description_longue || '';
+  document.getElementById('me-prix').value = p.prix;
+  document.getElementById('me-lien').value = p.lien_app_web || '';
+  document.getElementById('modal-edit').classList.add('on');
+}
+
+function fermerModalEdit(){
+  document.getElementById('modal-edit').classList.remove('on');
+  produitEdite = null;
+}
+
+async function sauvegarderModifProduit(){
+  if(!produitEdite) return;
+  const btn = document.getElementById('me-btn');
+  btn.disabled = true; btn.textContent = 'Enregistrement...';
+  try{
+    const titre = document.getElementById('me-titre').value.trim();
+    const desc = document.getElementById('me-desc').value.trim();
+    const prix = parseFloat(document.getElementById('me-prix').value);
+    const lien = document.getElementById('me-lien').value.trim();
+    if(!titre || isNaN(prix)){ toast('Titre et prix obligatoires',true); return; }
+    const {error} = await sb.from('produits').update({titre, description_longue: desc, prix, lien_app_web: lien||null}).eq('id', produitEdite.id);
+    if(error) throw error;
+    toast('Produit modifié ✅');
+    fermerModalEdit();
+    await chargerMesProduits();
+    await chargerProduits();
+  }catch(e){ console.error(e); toast('Erreur : '+(e.message||'inconnue'),true); }
+  finally{ btn.disabled = false; btn.textContent = 'Enregistrer'; }
+}
+
+async function supprimerProduit(id){
+  if(!confirm('Supprimer ce produit ? Cette action est définitive.')) return;
+  const {error} = await sb.from('produits').delete().eq('id', id);
+  if(error){ toast('Erreur : '+error.message,true); return; }
+  toast('Produit supprimé ✅');
+  await chargerMesProduits();
+  await chargerProduits();
 }
 
 async function chargerCommandesRecues(){
@@ -1016,55 +1115,64 @@ function carteCommande(c, proofUrl){
   const badge = c.statut==='validee'?'<span class="badge green">Validée</span>':c.statut==='preuve_envoyee'?'<span class="badge yellow">À valider</span>':c.statut==='refusee'?'<span class="badge red">Refusée</span>':'<span class="badge">'+c.statut+'</span>';
   let actions = '';
   if(c.statut==='preuve_envoyee'){
-    actions = `<div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn ghost" style="flex:1;padding:10px;font-size:12px" onclick="refuserCommande('${c.id}')">Refuser</button>
-      <button class="btn" style="flex:1;padding:10px;font-size:12px" onclick="validerCommande('${c.id}')">✓ Valider</button>
-    </div>`;
+    actions = '<div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost" style="flex:1;padding:10px;font-size:12px" onclick="refuserCommande(\''+c.id+'\')">Refuser</button><button class="btn" style="flex:1;padding:10px;font-size:12px" onclick="validerCommande(\''+c.id+'\')">✓ Valider</button></div>';
   }
   if(c.statut==='validee' || c.statut==='preuve_envoyee'){
-    actions += `<button class="btn ghost" style="margin-top:8px;padding:10px;font-size:12px" onclick="ouvrirChat('${c.id}','${(c.produits?.titre||'').replace(/'/g,"\\'")}','${c.client_id}','client')"><i data-lucide="message-circle" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:4px"></i>Contacter le client</button>`;
+    actions += '<button class="btn ghost" style="margin-top:8px;padding:10px;font-size:12px" onclick="ouvrirChatCommande(\''+c.id+'\',\''+(c.produits?.titre||'').replace(/'/g,"\\'")+'\',\''+c.client_id+'\',\'client\')"><i data-lucide="message-circle" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:4px"></i>Contacter le client</button>';
   }
-  const proofHtml = proofUrl
-    ? `<div style="margin-top:10px"><p style="font-size:11px;color:var(--muted);margin-bottom:6px">Preuve du client :</p><img src="${proofUrl}" style="width:100%;border-radius:10px" /></div>`
-    : '';
-  return `<div class="card" style="padding:14px">
-    <div style="display:flex;align-items:center;gap:12px">
-      <div class="tile" style="width:42px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:12px;aspect-ratio:1"><i data-lucide="package" style="width:18px;height:18px"></i></div>
-      <div style="flex:1;min-width:0">
-        <p style="font-size:12px;font-weight:700">${c.produits?.titre||'Produit'}</p>
-        <p style="font-size:10px;color:var(--muted);margin-top:2px">${Number(c.montant).toLocaleString('fr-FR')} ${c.devise} · ${c.operateur_paiement||''}</p>
-      </div>
-      ${badge}
-    </div>
-    ${proofHtml}
-    ${actions}
-  </div>`;
+  const proofHtml = proofUrl ? '<div style="margin-top:10px"><p style="font-size:11px;color:var(--muted);margin-bottom:6px">Preuve du client :</p><img src="'+proofUrl+'" style="width:100%;border-radius:10px" /></div>' : '';
+  return '<div class="card" style="padding:14px"><div style="display:flex;align-items:center;gap:12px"><div class="tile" style="width:42px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:12px;aspect-ratio:1"><i data-lucide="package" style="width:18px;height:18px"></i></div><div style="flex:1;min-width:0"><p style="font-size:12px;font-weight:700">'+(c.produits?.titre||'Produit')+'</p><p style="font-size:10px;color:var(--muted);margin-top:2px">'+(c.montant==0?'🎁 Gratuit':Number(c.montant).toLocaleString('fr-FR')+' '+c.devise)+' · '+(c.operateur_paiement||'')+'</p></div>'+badge+'</div>'+proofHtml+actions+'</div>';
 }
 
 async function validerCommande(id){
-  if(!confirm('Valider cette commande et donner accès au client ?')) return;
-  const {error} = await sb.from('commandes').update({
-    statut:'validee', valide_par: currentUser.id, valide_le: new Date().toISOString()
-  }).eq('id',id);
+  if(!confirm('Valider cette commande ?')) return;
+  const {data:cmd} = await sb.from('commandes').select('client_id').eq('id',id).single();
+  const {error} = await sb.from('commandes').update({statut:'validee', valide_par: currentUser.id, valide_le: new Date().toISOString()}).eq('id',id);
   if(error){ toast('Erreur : '+error.message,true); return; }
-  await sb.from('notifications').insert({
-    user_id: (await sb.from('commandes').select('client_id').eq('id',id).single()).data.client_id,
-    titre: '✅ Commande validée',
-    message: 'Ton achat a été validé. Tu as accès au produit !',
-    type: 'validation'
-  });
+  if(cmd){
+    await sb.from('notifications').insert({
+      user_id: cmd.client_id,
+      titre: '✅ Commande validée',
+      message: 'Ton achat a été validé. Tu as maintenant accès au produit !',
+      type: 'validation'
+    });
+  }
   toast('✅ Validée — client débloqué');
   chargerCommandesRecues();
 }
 
 async function refuserCommande(id){
   if(!confirm('Refuser cette commande ?')) return;
-  const {error} = await sb.from('commandes').update({
-    statut:'refusee', valide_par: currentUser.id, valide_le: new Date().toISOString()
-  }).eq('id',id);
+  const {data:cmd} = await sb.from('commandes').select('client_id').eq('id',id).single();
+  const {error} = await sb.from('commandes').update({statut:'refusee', valide_par: currentUser.id, valide_le: new Date().toISOString()}).eq('id',id);
   if(error){ toast('Erreur : '+error.message,true); return; }
+  if(cmd){
+    await sb.from('notifications').insert({
+      user_id: cmd.client_id,
+      titre: '❌ Commande refusée',
+      message: 'Le vendeur a refusé ta commande.',
+      type: 'validation'
+    });
+  }
   toast('Commande refusée',true);
   chargerCommandesRecues();
+}
+
+function choisirTypeProduit(t){
+  typeProduit = t;
+  document.getElementById('type-payant').classList.toggle('on', t==='payant');
+  document.getElementById('type-gratuit').classList.toggle('on', t==='gratuit');
+  document.getElementById('bloc-paiement').style.display = t==='payant' ? 'block' : 'none';
+  document.getElementById('field-prix').style.display = t==='payant' ? 'block' : 'none';
+  if(t==='gratuit'){
+    document.getElementById('p-prix').value = '';
+    document.getElementById('pay-airtel').checked = false;
+    document.getElementById('pay-moov').checked = false;
+    document.getElementById('num-airtel').value = '';
+    document.getElementById('num-moov').value = '';
+    document.getElementById('num-airtel').disabled = true;
+    document.getElementById('num-moov').disabled = true;
+  }
 }
 
 function togglePay(type){
@@ -1082,15 +1190,19 @@ document.getElementById('produit-form').addEventListener('submit', async (e)=>{
     const type=document.getElementById('p-type').value;
     const titre=document.getElementById('p-titre').value.trim();
     const desc=document.getElementById('p-desc').value.trim();
-    const prix=parseFloat(document.getElementById('p-prix').value);
     const lien=document.getElementById('p-lien').value.trim();
-    const airtelOk=document.getElementById('pay-airtel').checked;
-    const moovOk=document.getElementById('pay-moov').checked;
-    const numAirtel=document.getElementById('num-airtel').value.trim();
-    const numMoov=document.getElementById('num-moov').value.trim();
-    if(!airtelOk && !moovOk){ toast('Coche au moins un moyen de paiement',true); return; }
-    if(airtelOk && !numAirtel){ toast('Entre ton numéro Airtel',true); return; }
-    if(moovOk && !numMoov){ toast('Entre ton numéro Moov',true); return; }
+    let airtelOk=false, moovOk=false, numAirtel='', numMoov='', prix=0;
+    if(typeProduit === 'payant'){
+      prix = parseFloat(document.getElementById('p-prix').value);
+      if(!prix || prix <= 0){ toast('Entre un prix valide',true); btn.disabled=false; btn.textContent='Publier le produit'; return; }
+      airtelOk=document.getElementById('pay-airtel').checked;
+      moovOk=document.getElementById('pay-moov').checked;
+      numAirtel=document.getElementById('num-airtel').value.trim();
+      numMoov=document.getElementById('num-moov').value.trim();
+      if(!airtelOk && !moovOk){ toast('Coche au moins un moyen de paiement',true); btn.disabled=false; btn.textContent='Publier le produit'; return; }
+      if(airtelOk && !numAirtel){ toast('Entre ton numéro Airtel',true); btn.disabled=false; btn.textContent='Publier le produit'; return; }
+      if(moovOk && !numMoov){ toast('Entre ton numéro Moov',true); btn.disabled=false; btn.textContent='Publier le produit'; return; }
+    }
     const slug = titre.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+Date.now();
     let logo_url=null;
     const lf=document.getElementById('p-logo').files[0];
@@ -1131,18 +1243,15 @@ document.getElementById('produit-form').addEventListener('submit', async (e)=>{
     const moyens=[];
     if(airtelOk) moyens.push({produit_id:prod.id,operateur:'airtel',numero:numAirtel,nom_beneficiaire:currentProfile.nom_complet});
     if(moovOk) moyens.push({produit_id:prod.id,operateur:'moov',numero:numMoov,nom_beneficiaire:currentProfile.nom_complet});
-    await sb.from('moyens_paiement').insert(moyens);
+    if(moyens.length > 0) await sb.from('moyens_paiement').insert(moyens);
     toast('Produit publié ✅');
     document.getElementById('produit-form').reset();
     document.getElementById('logo-prev').style.display='none';
+    choisirTypeProduit('payant');
     await chargerProduits();
     _go('vendre');
-  }catch(e){
-    console.error(e);
-    toast('Erreur : '+(e.message||'inconnue'),true);
-  }finally{
-    btn.disabled=false; btn.textContent='Publier le produit';
-  }
+  }catch(e){ console.error(e); toast('Erreur : '+(e.message||'inconnue'),true); }
+  finally{ btn.disabled=false; btn.textContent='Publier le produit'; }
 });
 
 function getDuration(file, type){
@@ -1155,7 +1264,6 @@ function getDuration(file, type){
   });
 }
 
-// ===== FICHIERS =====
 function previewFile(e,id){
   const f=e.target.files[0]; if(!f) return;
   const r=new FileReader();
@@ -1175,8 +1283,8 @@ function checkAudio(e){
     const min=a.duration/60;
     const info=document.getElementById('audio-info');
     info.style.display='block';
-    if(min>30){
-      info.textContent='❌ Trop long ('+min.toFixed(1)+' min). Max 30 min.';
+    if(min>75){
+      info.textContent='❌ Trop long ('+min.toFixed(1)+' min). Max 1h15.';
       info.style.color='#f87171'; e.target.value='';
     } else {
       info.textContent='✅ Accepté · '+min.toFixed(1)+' min · Aperçu client : 30 sec';
@@ -1193,8 +1301,8 @@ function checkVideo(e){
     const min=v.duration/60;
     const info=document.getElementById('video-info');
     info.style.display='block';
-    if(min>90){
-      info.textContent='❌ Trop longue ('+min.toFixed(1)+' min). Max 1h30.';
+    if(min>270){
+      info.textContent='❌ Trop longue ('+min.toFixed(1)+' min). Max 4h30.';
       info.style.color='#f87171'; e.target.value='';
     } else {
       info.textContent='✅ Acceptée · '+min.toFixed(1)+' min · Bande-annonce : 30 sec';
@@ -1203,7 +1311,6 @@ function checkVideo(e){
   });
 }
 
-// ===== TOAST =====
 let t;
 function toast(msg, err){
   const el=document.getElementById('toast');
